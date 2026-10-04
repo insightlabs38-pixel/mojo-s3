@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Strict gate: a successful build does not qualify a sanitizer runtime.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+mkdir -p build/sanitizers
+mojo_s3_diagnostics="$PWD/build/sanitizers"
+{
+    ./scripts/mojo --version
+    uname -a
+    cat /etc/os-release
+    ldd --version
+    getconf LONG_BIT
+    lscpu
+    ulimit -a
+    cat /proc/self/limits /proc/self/cgroup
+    free -h
+    for file in /sys/fs/cgroup/memory.{max,high,current,swap.max} /sys/fs/cgroup/pids.max /proc/sys/vm/{max_map_count,overcommit_memory,overcommit_ratio}; do
+        if [[ -r "$file" ]]; then echo "$file"; cat "$file"; fi
+    done
+} > "$mojo_s3_diagnostics/environment.log" 2>&1
+mojo_s3_runtime_failed=0
+for variant in normal address thread; do
+    mojo_s3_flags=()
+    if [[ "$variant" != normal ]]; then mojo_s3_flags=(--sanitize "$variant"); fi
+    ./scripts/mojo build "${mojo_s3_flags[@]}" tests/diagnostics/hello.mojo -o "$mojo_s3_diagnostics/hello-$variant" > "$mojo_s3_diagnostics/build-$variant.log" 2>&1
+    ldd "$mojo_s3_diagnostics/hello-$variant" > "$mojo_s3_diagnostics/dependencies-$variant.log"
+    readelf -d "$mojo_s3_diagnostics/hello-$variant" > "$mojo_s3_diagnostics/elf-$variant.log"
+    if "$mojo_s3_diagnostics/hello-$variant" > "$mojo_s3_diagnostics/run-$variant.log" 2>&1; then
+        echo "$variant: exit 0"
+    else
+        mojo_s3_status=$?
+        echo "$variant: exit $mojo_s3_status"
+        cat "$mojo_s3_diagnostics/run-$variant.log"
+        mojo_s3_runtime_failed=1
+    fi
+done
+if [[ "${RUN_TSAN_TRACE:-0}" == 1 ]]; then
+    strace -o "$mojo_s3_diagnostics/mmap.trace" -e trace=mmap,munmap,mremap,brk,prlimit64 "$mojo_s3_diagnostics/hello-thread" > "$mojo_s3_diagnostics/trace-run.log" 2>&1 || true
+fi
+if [[ "$mojo_s3_runtime_failed" == 1 ]]; then
+    echo "Sanitizer runtime qualification failed; SDK concurrency was not executed. Evidence: $mojo_s3_diagnostics" >&2
+    exit 99
+fi
+for test in threads concurrent_failures; do
+    ./scripts/build "tests/test_${test}.mojo" "build/test_${test}_tsan" --sanitize thread -g
+done
+build/test_threads_tsan
+python3 scripts/run_fault_tests.py "$PWD/build/test_concurrent_failures_tsan"
+if [[ "${RUN_S3_INTEGRATION:-0}" == 1 ]]; then
+    : "${S3_TEST_BUCKET:?Set an isolated S3_TEST_BUCKET}"
+    : "${S3_STREAM_SOURCE:?Set a stable unique-block fixture}"
+    ./scripts/build tests/test_concurrent_integration.mojo build/test_concurrent_integration_tsan --sanitize thread -g
+    build/test_concurrent_integration_tsan
+fi

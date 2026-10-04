@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+./scripts/format --check
+mkdir -p build
+./scripts/mojo precompile -I src src/mojo_s3 -o build/mojo_s3.mojoc
+for test in crypto signing signing_differential xml protocol retry multipart properties threads; do
+    ./scripts/build "tests/test_${test}.mojo" "build/test_${test}"
+    "build/test_${test}"
+done
+for test in http transport_failures tls concurrent_failures checksums; do
+    ./scripts/build "tests/test_${test}.mojo" "build/test_${test}"
+done
+python3 scripts/run_fault_tests.py "$PWD/build/test_http" "$PWD/build/test_transport_failures" "$PWD/build/test_concurrent_failures" "$PWD/build/test_checksums"
+python3 scripts/run_tls_test.py "$PWD/build/test_tls"
+for example in examples/*.mojo; do
+    ./scripts/build "$example" "build/$(basename "$example" .mojo)"
+done
+if [[ "${RUN_S3_INTEGRATION:-0}" == 1 ]]; then
+    : "${S3_TEST_BUCKET:?Set an isolated S3_TEST_BUCKET}"
+    ./scripts/build tests/test_integration.mojo build/test_integration
+    build/test_integration
+    if [[ -n "${S3_STREAM_SOURCE:-}" && -n "${S3_STREAM_DESTINATION:-}" ]]; then
+        for test in streaming multipart_integration concurrent_integration; do
+            ./scripts/build "tests/test_${test}.mojo" "build/test_${test}"
+            "build/test_${test}"
+        done
+    fi
+fi
+
+if [[ "${RUN_EXTENDED_KEYS:-0}" == 1 ]]; then
+    ./scripts/build tests/test_extended_keys.mojo build/test_extended_keys
+    build/test_extended_keys
+fi
+if [[ "${RUN_S3_CHECKSUMS:-0}" == 1 ]]; then
+    ./scripts/build tests/test_checksums_integration.mojo build/test_checksums_integration
+    build/test_checksums_integration
+fi

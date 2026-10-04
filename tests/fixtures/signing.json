@@ -1,0 +1,3422 @@
+{
+  "generator": "botocore 1.43.108",
+  "seed": 74391,
+  "cases": [
+    {
+      "method": "GET",
+      "path": "/bucket/-%26_/%23%E9%9B%AA.%26%25Z9%23%2B%20%20-%20%26z_9%C3%A9%E9%9B%AA0",
+      "query": [
+        [
+          "prefix",
+          "== %=a"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "test-session-token",
+      "canonical": "GET\n/bucket/-%26_/%23%E9%9B%AA.%26%25Z9%23%2B%20%20-%20%26z_9%C3%A9%E9%9B%AA0\nduplicate=%20a&duplicate=z&empty=&prefix=%3D%3D%20%25%3Da\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "b8121ec847fe003a6426de9855b995aef49a550ed7eb107009b4ee2be475d349"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/%3D%3D%E9%9B%AA/zZ-%E9%9B%AA%C3%A9Z%2B%3F-%25AZ%23%E9%9B%AA%23%C3%A9A%2B%25%E9%9B%AA",
+      "query": [
+        [
+          "prefix",
+          "é  é%+"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "95a6c76b8b9e66134afd879d41d9dc67c6b3c5008b1a81205302a2f66d6472d4"
+        ]
+      ],
+      "payload": "payload-é-1",
+      "token": "",
+      "canonical": "PUT\n/bucket/%3D%3D%E9%9B%AA/zZ-%E9%9B%AA%C3%A9Z%2B%3F-%25AZ%23%E9%9B%AA%23%C3%A9A%2B%25%E9%9B%AA\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%20%20%C3%A9%25%2B\nhost:example.test:9443\nx-amz-content-sha256:95a6c76b8b9e66134afd879d41d9dc67c6b3c5008b1a81205302a2f66d6472d4\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n95a6c76b8b9e66134afd879d41d9dc67c6b3c5008b1a81205302a2f66d6472d4",
+      "signature": "1182325dcfc2689730e1a343697ca4bba5b22ce621ddf49fbfc8085db1221a28"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/%25%3F%26%2B%20%2B%20%20%239%26%C3%A9%23/%26.%26%C3%A9%3D/A%E9%9B%AAA%C3%A9",
+      "query": [
+        [
+          "prefix",
+          "+é=%+a"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "HEAD\n/bucket/%25%3F%26%2B%20%2B%20%20%239%26%C3%A9%23/%26.%26%C3%A9%3D/A%E9%9B%AAA%C3%A9\nduplicate=%20a&duplicate=z&empty=&prefix=%2B%C3%A9%3D%25%2Ba\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "61cc1f36104aad55044b7f975ae481977e59511f8e4f05afc922fef627b582e5"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/_z%3D%269%3F--%E9%9B%AAz_.Az.%25%3F%25Z9%20-%E9%9B%AA%E9%9B%AA",
+      "query": [
+        [
+          "prefix",
+          "%+a= é"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e1caa6e083b3b2f13cba19e2468a582abdd4a42be39cbdd92c7265c561d72dd3"
+        ]
+      ],
+      "payload": "payload-é-3",
+      "token": "test-session-token",
+      "canonical": "DELETE\n/bucket/_z%3D%269%3F--%E9%9B%AAz_.Az.%25%3F%25Z9%20-%E9%9B%AA%E9%9B%AA\nduplicate=%20a&duplicate=z&empty=&prefix=%25%2Ba%3D%20%C3%A9\nhost:example.test:9443\nx-amz-content-sha256:e1caa6e083b3b2f13cba19e2468a582abdd4a42be39cbdd92c7265c561d72dd3\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne1caa6e083b3b2f13cba19e2468a582abdd4a42be39cbdd92c7265c561d72dd3",
+      "signature": "f0d13b22d19c5348dee3ee1cfbbfd32526ced281c6a9c19b2f8263a9fc8a5264"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/z_/%3DzazA_%20%25%23%3F%25%3D9%25/0a%25%C3%A9%3Fa",
+      "query": [
+        [
+          "prefix",
+          "==a +%"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "GET\n/bucket/z_/%3DzazA_%20%25%23%3F%25%3D9%25/0a%25%C3%A9%3Fa\nduplicate=%20a&duplicate=z&empty=&prefix=%3D%3Da%20%2B%25\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "f51f8c82a6a29c1da995a7cc8fc704d3b92bab5e742292222e9d026aa0e86458"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/%26z%23%3D_--a%3F%3D-_%26%2Bz%E9%9B%AA%20%2B9%259z0_",
+      "query": [
+        [
+          "prefix",
+          "aééééé"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "82698c64e58af7689549beee6b76dd1ccf40c6728b9ac39ee20de67f89df2445"
+        ]
+      ],
+      "payload": "payload-é-5",
+      "token": "",
+      "canonical": "PUT\n/bucket/%26z%23%3D_--a%3F%3D-_%26%2Bz%E9%9B%AA%20%2B9%259z0_\nduplicate=%20a&duplicate=z&empty=&prefix=a%C3%A9%C3%A9%C3%A9%C3%A9%C3%A9\nhost:example.test:9443\nx-amz-content-sha256:82698c64e58af7689549beee6b76dd1ccf40c6728b9ac39ee20de67f89df2445\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n82698c64e58af7689549beee6b76dd1ccf40c6728b9ac39ee20de67f89df2445",
+      "signature": "dd6611f65b857c52beb100c6559e0a9883ebd93ba1bb4aca2f983043927230b3"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/%230%20A%2B0%26%3D0aA%25%2B%26%E9%9B%AA0%E9%9B%AAZ%26%25/0%269",
+      "query": [
+        [
+          "prefix",
+          "=éa+ é"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "test-session-token",
+      "canonical": "HEAD\n/bucket/%230%20A%2B0%26%3D0aA%25%2B%26%E9%9B%AA0%E9%9B%AAZ%26%25/0%269\nduplicate=%20a&duplicate=z&empty=&prefix=%3D%C3%A9a%2B%20%C3%A9\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "fc0b9e1408e906da60f586ed68f94c3d2b80d4d09bc6dfcf5dfdc00f74ebd19d"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/Z%E9%9B%AA%26-/_%26A%26ZZz%23%20%C3%A9-%25%26..%23%2B%3F%C3%A9",
+      "query": [
+        [
+          "prefix",
+          "é+=% +"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "4a822d5011bf0bfa6b54f8f9f5b269dd5bc83db0087ffd0c901312002cfecf7d"
+        ]
+      ],
+      "payload": "payload-é-7",
+      "token": "",
+      "canonical": "DELETE\n/bucket/Z%E9%9B%AA%26-/_%26A%26ZZz%23%20%C3%A9-%25%26..%23%2B%3F%C3%A9\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%2B%3D%25%20%2B\nhost:example.test:9443\nx-amz-content-sha256:4a822d5011bf0bfa6b54f8f9f5b269dd5bc83db0087ffd0c901312002cfecf7d\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n4a822d5011bf0bfa6b54f8f9f5b269dd5bc83db0087ffd0c901312002cfecf7d",
+      "signature": "64700cf80937140fd952087ea52ce6c8396e57e469f42cd2e853aa7190a97b75"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/0%3F.%3F%3D9%26.%3F%26_%2B../%2B0%E9%9B%AAz%25%3Daa%C3%A9",
+      "query": [
+        [
+          "prefix",
+          "++%+a "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "GET\n/bucket/0%3F.%3F%3D9%26.%3F%26_%2B../%2B0%E9%9B%AAz%25%3Daa%C3%A9\nduplicate=%20a&duplicate=z&empty=&prefix=%2B%2B%25%2Ba%20\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "75e63653aab660bda4bf799b97a18ad37ee7240fd06d53b0b2791a4ba290113d"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/.%260%25%25-0a%2B%20%20%25aZz%26.%3F%2BZzz%E9%9B%AAA",
+      "query": [
+        [
+          "prefix",
+          "=aé é%"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "366a5440df4a568c0c2d5a7c109d40ccbdb4454e245f3aa9e2b02b621167de07"
+        ]
+      ],
+      "payload": "payload-é-9",
+      "token": "test-session-token",
+      "canonical": "PUT\n/bucket/.%260%25%25-0a%2B%20%20%25aZz%26.%3F%2BZzz%E9%9B%AAA\nduplicate=%20a&duplicate=z&empty=&prefix=%3Da%C3%A9%20%C3%A9%25\nhost:example.test:9443\nx-amz-content-sha256:366a5440df4a568c0c2d5a7c109d40ccbdb4454e245f3aa9e2b02b621167de07\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\n366a5440df4a568c0c2d5a7c109d40ccbdb4454e245f3aa9e2b02b621167de07",
+      "signature": "a05aa6e9efe765faff22f0251b531b33c2e32d2b42d63b69475185eff568b881"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/%E9%9B%AA/ZA%3F%C3%A9%2B%3D9ZZ%26%3F%26.%2B%20a%200.0%C3%A9/",
+      "query": [
+        [
+          "prefix",
+          " a=a+ "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "HEAD\n/bucket/%E9%9B%AA/ZA%3F%C3%A9%2B%3D9ZZ%26%3F%26.%2B%20a%200.0%C3%A9/\nduplicate=%20a&duplicate=z&empty=&prefix=%20a%3Da%2B%20\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "6c395123d2b20f3b4dc7bbfa7a114217a0c6533179854f578a933aeb29419a77"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/_%20Z%3D_%E9%9B%AA%23%3DA%25z9%2B-/z%20%C3%A99-9Z%23%3D",
+      "query": [
+        [
+          "prefix",
+          "== =% "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "9a9505a8eccd6c1d9670cab0c34ca41d2900f0ae8cfdd97f8ae4b6d9c57fc399"
+        ]
+      ],
+      "payload": "payload-é-11",
+      "token": "",
+      "canonical": "DELETE\n/bucket/_%20Z%3D_%E9%9B%AA%23%3DA%25z9%2B-/z%20%C3%A99-9Z%23%3D\nduplicate=%20a&duplicate=z&empty=&prefix=%3D%3D%20%3D%25%20\nhost:example.test:9443\nx-amz-content-sha256:9a9505a8eccd6c1d9670cab0c34ca41d2900f0ae8cfdd97f8ae4b6d9c57fc399\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n9a9505a8eccd6c1d9670cab0c34ca41d2900f0ae8cfdd97f8ae4b6d9c57fc399",
+      "signature": "981fdfacd1882ca5d298f50d4319a253682c5e33679ddff7f8e99a84f38a919b"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/%2B0/Z%26/%C3%A9_a%23/%E9%9B%AAz%20-aA9_%3D__AA",
+      "query": [
+        [
+          "prefix",
+          "++a% +"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "test-session-token",
+      "canonical": "GET\n/bucket/%2B0/Z%26/%C3%A9_a%23/%E9%9B%AAz%20-aA9_%3D__AA\nduplicate=%20a&duplicate=z&empty=&prefix=%2B%2Ba%25%20%2B\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "384d99d819a21fc7f986273927384ca1805456f35d6d01e81b8b30755b1b08c5"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/%2B%C3%A9-.ZaZ%20a%26%2Bz%3D%3F.%25%3D%25%C3%A9%3D%3DZ%20%20",
+      "query": [
+        [
+          "prefix",
+          "a=é=%+"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "2611eb277b593c85628992a63263a510da729af491a707d890ca0b8cdddfcb6f"
+        ]
+      ],
+      "payload": "payload-é-13",
+      "token": "",
+      "canonical": "PUT\n/bucket/%2B%C3%A9-.ZaZ%20a%26%2Bz%3D%3F.%25%3D%25%C3%A9%3D%3DZ%20%20\nduplicate=%20a&duplicate=z&empty=&prefix=a%3D%C3%A9%3D%25%2B\nhost:example.test:9443\nx-amz-content-sha256:2611eb277b593c85628992a63263a510da729af491a707d890ca0b8cdddfcb6f\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n2611eb277b593c85628992a63263a510da729af491a707d890ca0b8cdddfcb6f",
+      "signature": "38f495b08e17a8a3fb277fda84468ff7456d1d383c7a5e641d50513c97982e17"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/%23%C3%A9%25%26%26_%2B%C3%A9-A%C3%A9.A%20-zA%26Z/%2099%2B",
+      "query": [
+        [
+          "prefix",
+          "é+=aé "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "HEAD\n/bucket/%23%C3%A9%25%26%26_%2B%C3%A9-A%C3%A9.A%20-zA%26Z/%2099%2B\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%2B%3Da%C3%A9%20\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "c2f7e19f6c0a8998e9336e3451fcdf36fe6d895ba5a4f58de8042411b47aa817"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/az-%E9%9B%AA%23Z%C3%A9%20./%3FaA_%C3%A9Z.%20%C3%A9%3D.%20%3F%C3%A9",
+      "query": [
+        [
+          "prefix",
+          "é= +é%"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "21c5e4a70a729b486352d09f1ed8c3803f6aa7b50c5cc86b7560de67a5cd3ea9"
+        ]
+      ],
+      "payload": "payload-é-15",
+      "token": "test-session-token",
+      "canonical": "DELETE\n/bucket/az-%E9%9B%AA%23Z%C3%A9%20./%3FaA_%C3%A9Z.%20%C3%A9%3D.%20%3F%C3%A9\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%3D%20%2B%C3%A9%25\nhost:example.test:9443\nx-amz-content-sha256:21c5e4a70a729b486352d09f1ed8c3803f6aa7b50c5cc86b7560de67a5cd3ea9\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\n21c5e4a70a729b486352d09f1ed8c3803f6aa7b50c5cc86b7560de67a5cd3ea9",
+      "signature": "e0fb0aec76175b7c15b461a1c7ad988330e7767f722a31d6266d618c18174435"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/Z%E9%9B%AA9%26%25-%2B%3F%26z-_0%3D_.%2B%3F%20%E9%9B%AA%20%23%26%2B",
+      "query": [
+        [
+          "prefix",
+          "a+é+é="
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "GET\n/bucket/Z%E9%9B%AA9%26%25-%2B%3F%26z-_0%3D_.%2B%3F%20%E9%9B%AA%20%23%26%2B\nduplicate=%20a&duplicate=z&empty=&prefix=a%2B%C3%A9%2B%C3%A9%3D\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "7334a3c6b89648bad8174014588bf887ee3d327e077ddbb628b503980f45faa3"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/%C3%A9_z-%E9%9B%AAZ9%3F%3F%3Da9%25Z%3Dz%2B%23%E9%9B%AA09%26aA",
+      "query": [
+        [
+          "prefix",
+          "éa% % "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "37618c91ae40dea43c1f63420da5242f2a97f6722b8f0c7b8f51fb62556dfa42"
+        ]
+      ],
+      "payload": "payload-é-17",
+      "token": "",
+      "canonical": "PUT\n/bucket/%C3%A9_z-%E9%9B%AAZ9%3F%3F%3Da9%25Z%3Dz%2B%23%E9%9B%AA09%26aA\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9a%25%20%25%20\nhost:example.test:9443\nx-amz-content-sha256:37618c91ae40dea43c1f63420da5242f2a97f6722b8f0c7b8f51fb62556dfa42\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n37618c91ae40dea43c1f63420da5242f2a97f6722b8f0c7b8f51fb62556dfa42",
+      "signature": "2206c57de553906e80b52cef6be00027093a15c7df202350e6ed44ec11094223"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/%E9%9B%AA-%C3%A9%3F_Z%26%25%3D%23Zza%25Z%23A%23%2B%20-A__",
+      "query": [
+        [
+          "prefix",
+          "é% % ="
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "test-session-token",
+      "canonical": "HEAD\n/bucket/%E9%9B%AA-%C3%A9%3F_Z%26%25%3D%23Zza%25Z%23A%23%2B%20-A__\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%25%20%25%20%3D\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "b4ef00dab1a417522864e163461528b392f898ed51efa4a612cee788e116c7c2"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/9_%E9%9B%AAZ%25.Z%3D%E9%9B%AA%C3%A9Z/Z9/%3D/9_%26%C3%A9%20%23%25",
+      "query": [
+        [
+          "prefix",
+          "ééé   "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "7d6e4bb3a2c196cebcdcf73ea5b6d3b1f30047c0f40268f710cc447e03979d6a"
+        ]
+      ],
+      "payload": "payload-é-19",
+      "token": "",
+      "canonical": "DELETE\n/bucket/9_%E9%9B%AAZ%25.Z%3D%E9%9B%AA%C3%A9Z/Z9/%3D/9_%26%C3%A9%20%23%25\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%C3%A9%C3%A9%20%20%20\nhost:example.test:9443\nx-amz-content-sha256:7d6e4bb3a2c196cebcdcf73ea5b6d3b1f30047c0f40268f710cc447e03979d6a\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n7d6e4bb3a2c196cebcdcf73ea5b6d3b1f30047c0f40268f710cc447e03979d6a",
+      "signature": "f4216b77ff02d24bf7d6e14dbc937c3bac211d343a72732902b31b98bfbef226"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/%20%3D%25%25%20%23%26Z_a%26/%E9%9B%AA%260%3F9%C3%A9Z%C3%A90a-%3F",
+      "query": [
+        [
+          "prefix",
+          " + =+é"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "GET\n/bucket/%20%3D%25%25%20%23%26Z_a%26/%E9%9B%AA%260%3F9%C3%A9Z%C3%A90a-%3F\nduplicate=%20a&duplicate=z&empty=&prefix=%20%2B%20%3D%2B%C3%A9\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "23d1f3d8950ed18af59d8a071d0f5df70f286b9bd0bdcb76d3092b917563dc24"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/.%2B%26%26%20%26Z%26A-%E9%9B%AA9a%E9%9B%AA/%C3%A9%26%20%3F%3F%C3%A9%2B%23%2B",
+      "query": [
+        [
+          "prefix",
+          "=a%=éé"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "c00c4edbb5ff5df36f5971908f892234cc05de28ce01a71bf0d973013691f560"
+        ]
+      ],
+      "payload": "payload-é-21",
+      "token": "test-session-token",
+      "canonical": "PUT\n/bucket/.%2B%26%26%20%26Z%26A-%E9%9B%AA9a%E9%9B%AA/%C3%A9%26%20%3F%3F%C3%A9%2B%23%2B\nduplicate=%20a&duplicate=z&empty=&prefix=%3Da%25%3D%C3%A9%C3%A9\nhost:example.test:9443\nx-amz-content-sha256:c00c4edbb5ff5df36f5971908f892234cc05de28ce01a71bf0d973013691f560\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\nc00c4edbb5ff5df36f5971908f892234cc05de28ce01a71bf0d973013691f560",
+      "signature": "049eed4b97878ae4f52d872c3418bbe4bb19b42cf87d7fc7283a1dbe60572e26"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket//A%2B0%23.%25%C3%A9%3FA%239/A_%2Bz%25A_a_z%25",
+      "query": [
+        [
+          "prefix",
+          "%a%a%="
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "HEAD\n/bucket//A%2B0%23.%25%C3%A9%3FA%239/A_%2Bz%25A_a_z%25\nduplicate=%20a&duplicate=z&empty=&prefix=%25a%25a%25%3D\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "b061a91603028ac85c0ccd12dc1e3c4ac3f9e607cd9cdb18b2ce3ba5a94c6203"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/%E9%9B%AAz%20%25Z.%3D0.%25%3FA_%25%3F/%26Z%2B%2B0%3F/%C3%A9",
+      "query": [
+        [
+          "prefix",
+          "%%é =%"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "5e8515ec0b3114aad288d62222cfbf00aec414f446e6da7810c4368c7e548f2b"
+        ]
+      ],
+      "payload": "payload-é-23",
+      "token": "",
+      "canonical": "DELETE\n/bucket/%E9%9B%AAz%20%25Z.%3D0.%25%3FA_%25%3F/%26Z%2B%2B0%3F/%C3%A9\nduplicate=%20a&duplicate=z&empty=&prefix=%25%25%C3%A9%20%3D%25\nhost:example.test:9443\nx-amz-content-sha256:5e8515ec0b3114aad288d62222cfbf00aec414f446e6da7810c4368c7e548f2b\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n5e8515ec0b3114aad288d62222cfbf00aec414f446e6da7810c4368c7e548f2b",
+      "signature": "ec809bf63a0e36f38f02fd90097711b83f2d9f6c7b9d28389f3ea61162a1852c"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/%3FAz._a/-%20_0%20.%C3%A9%26%C3%A9%C3%A9%20-9%23%C3%A9a%25",
+      "query": [
+        [
+          "prefix",
+          "é %+é+"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "test-session-token",
+      "canonical": "GET\n/bucket/%3FAz._a/-%20_0%20.%C3%A9%26%C3%A9%C3%A9%20-9%23%C3%A9a%25\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%20%25%2B%C3%A9%2B\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "3474c998c43eb87ad29e5caf1acd9c2622b53baada417bceedc8fdc492cb2259"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/_Azz.-Z-%23/%26%26%2B%3FzA%20%25%C3%A9%2Ba0%23%26",
+      "query": [
+        [
+          "prefix",
+          "é aé+ "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "50788829d79866a66a04f66a3730634f6888b53b906397b39aba69895816f08d"
+        ]
+      ],
+      "payload": "payload-é-25",
+      "token": "",
+      "canonical": "PUT\n/bucket/_Azz.-Z-%23/%26%26%2B%3FzA%20%25%C3%A9%2Ba0%23%26\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%20a%C3%A9%2B%20\nhost:example.test:9443\nx-amz-content-sha256:50788829d79866a66a04f66a3730634f6888b53b906397b39aba69895816f08d\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n50788829d79866a66a04f66a3730634f6888b53b906397b39aba69895816f08d",
+      "signature": "29e137261a03cc389337bbbadb4d63e8557754b97f30a0b4cba1cd220ff01fa2"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/9%E9%9B%AA%3D%20/%20%26%E9%9B%AA.-a-%C3%A9%23%26%23%C3%A9/%23%200%3Da-",
+      "query": [
+        [
+          "prefix",
+          "é+%aéé"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "HEAD\n/bucket/9%E9%9B%AA%3D%20/%20%26%E9%9B%AA.-a-%C3%A9%23%26%23%C3%A9/%23%200%3Da-\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%2B%25a%C3%A9%C3%A9\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "fc34f937565502177c896abc9d7438d572cd5f156006e54c6dc8f38618cb4841"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/-A%C3%A9%23_%26Z%C3%A9%25%3DZ%C3%A9%3D%209/%3F%3D%E9%9B%AA_%3D%3FA%23",
+      "query": [
+        [
+          "prefix",
+          "++% éé"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "502018dff4fc0491e34175e64b63c09018c3a7676b9d4a0aecd05e60a1673ce6"
+        ]
+      ],
+      "payload": "payload-é-27",
+      "token": "test-session-token",
+      "canonical": "DELETE\n/bucket/-A%C3%A9%23_%26Z%C3%A9%25%3DZ%C3%A9%3D%209/%3F%3D%E9%9B%AA_%3D%3FA%23\nduplicate=%20a&duplicate=z&empty=&prefix=%2B%2B%25%20%C3%A9%C3%A9\nhost:example.test:9443\nx-amz-content-sha256:502018dff4fc0491e34175e64b63c09018c3a7676b9d4a0aecd05e60a1673ce6\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\n502018dff4fc0491e34175e64b63c09018c3a7676b9d4a0aecd05e60a1673ce6",
+      "signature": "6c502057754eb472e548fc4d22722a72b0230afee5f158f96ca2fcd265a62a82"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/%25%2B-Z%23%259%20_Z%3F%E9%9B%AA%2Bz%C3%A9..9%3D-%230%E9%9B%AA/",
+      "query": [
+        [
+          "prefix",
+          "  + aé"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "GET\n/bucket/%25%2B-Z%23%259%20_Z%3F%E9%9B%AA%2Bz%C3%A9..9%3D-%230%E9%9B%AA/\nduplicate=%20a&duplicate=z&empty=&prefix=%20%20%2B%20a%C3%A9\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "49d699f523c76d079f3d940050e50eff940632dffcd54b4dd0b038dae1839dfd"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/%26%26A%C3%A9%E9%9B%AA%3D0%E9%9B%AA%3D%C3%A9.a%3D-.%3F%26z-%26%2B_-9",
+      "query": [
+        [
+          "prefix",
+          "é é +a"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "623c6ae2c7c6140a78baa654910141e942e0d94784ff76dd34d6b58ef9d5b860"
+        ]
+      ],
+      "payload": "payload-é-29",
+      "token": "",
+      "canonical": "PUT\n/bucket/%26%26A%C3%A9%E9%9B%AA%3D0%E9%9B%AA%3D%C3%A9.a%3D-.%3F%26z-%26%2B_-9\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%20%C3%A9%20%2Ba\nhost:example.test:9443\nx-amz-content-sha256:623c6ae2c7c6140a78baa654910141e942e0d94784ff76dd34d6b58ef9d5b860\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n623c6ae2c7c6140a78baa654910141e942e0d94784ff76dd34d6b58ef9d5b860",
+      "signature": "bb168f02f5a38e80761d126ec13c47d1f45fac68aa2e779d827b778fbb6410b7"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/%C3%A9%23%E9%9B%AA%3D%20%2B%25%3F%20%23/-%3Dz.%26%C3%A9-%2B%E9%9B%AAZ-%3F%2B",
+      "query": [
+        [
+          "prefix",
+          "=aa =a"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "test-session-token",
+      "canonical": "HEAD\n/bucket/%C3%A9%23%E9%9B%AA%3D%20%2B%25%3F%20%23/-%3Dz.%26%C3%A9-%2B%E9%9B%AAZ-%3F%2B\nduplicate=%20a&duplicate=z&empty=&prefix=%3Daa%20%3Da\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "e146787f5b152d095016415c9b1ab53802f25aa1194ee1f02fa9e9a4ea4d488c"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/%25%E9%9B%AA%3F0_/z/A0%3Faz.%20..%23%3F%3FZ_zA",
+      "query": [
+        [
+          "prefix",
+          "=a+% +"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "75d6d2d90ff19d0a1730326be75fbd6072e3b9055e72cc38c994722306817d81"
+        ]
+      ],
+      "payload": "payload-é-31",
+      "token": "",
+      "canonical": "DELETE\n/bucket/%25%E9%9B%AA%3F0_/z/A0%3Faz.%20..%23%3F%3FZ_zA\nduplicate=%20a&duplicate=z&empty=&prefix=%3Da%2B%25%20%2B\nhost:example.test:9443\nx-amz-content-sha256:75d6d2d90ff19d0a1730326be75fbd6072e3b9055e72cc38c994722306817d81\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n75d6d2d90ff19d0a1730326be75fbd6072e3b9055e72cc38c994722306817d81",
+      "signature": "633d5cca652ec469a3bb921029f80628ef777b4b7af167811530ad7febf1b192"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/%23%E9%9B%AA%E9%9B%AA%3D.%E9%9B%AA_%23a%3D%20%C3%A9%26a-_%23z9%C3%A9%23%20%209",
+      "query": [
+        [
+          "prefix",
+          "==+ a="
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "GET\n/bucket/%23%E9%9B%AA%E9%9B%AA%3D.%E9%9B%AA_%23a%3D%20%C3%A9%26a-_%23z9%C3%A9%23%20%209\nduplicate=%20a&duplicate=z&empty=&prefix=%3D%3D%2B%20a%3D\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "65e17be50f5d0cee5b6b97faa975a1d31bfe1f5ad4cc5ee71d4fcb73883ef6a2"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/%26%E9%9B%AA%C3%A9%C3%A9%20%26a9%23%20a-AZA%E9%9B%AA_Z/%3D%25%26_%26",
+      "query": [
+        [
+          "prefix",
+          "ééé+é="
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "19d2f18d7cd7fc49be7cd71fa89b26129a2caa5a1602d70893a8171dc9da1983"
+        ]
+      ],
+      "payload": "payload-é-33",
+      "token": "test-session-token",
+      "canonical": "PUT\n/bucket/%26%E9%9B%AA%C3%A9%C3%A9%20%26a9%23%20a-AZA%E9%9B%AA_Z/%3D%25%26_%26\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%C3%A9%C3%A9%2B%C3%A9%3D\nhost:example.test:9443\nx-amz-content-sha256:19d2f18d7cd7fc49be7cd71fa89b26129a2caa5a1602d70893a8171dc9da1983\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\n19d2f18d7cd7fc49be7cd71fa89b26129a2caa5a1602d70893a8171dc9da1983",
+      "signature": "ad434cb0dfd84869196a55f7061319ba6953b07a83afa2d6f94fcef4a5e2350d"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/%20%25A%200%23%23%25Az0%3D%C3%A9%20.%26a0-/%23a/z",
+      "query": [
+        [
+          "prefix",
+          "= %%= "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "HEAD\n/bucket/%20%25A%200%23%23%25Az0%3D%C3%A9%20.%26a0-/%23a/z\nduplicate=%20a&duplicate=z&empty=&prefix=%3D%20%25%25%3D%20\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "8702b6b3625fac1c7c87c41d8ccf4af4dc141b1a724dc94d859369490b1d71e1"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/%C3%A9Aaz%3D%3DaAz-%26%25%E9%9B%AAaz%3F%C3%A9%250AAzz0",
+      "query": [
+        [
+          "prefix",
+          "=aé+aa"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "5753c21f5f9f329831cafe1968dd5bfb3bbba98273d6ffcc4586b0802d133f2d"
+        ]
+      ],
+      "payload": "payload-é-35",
+      "token": "",
+      "canonical": "DELETE\n/bucket/%C3%A9Aaz%3D%3DaAz-%26%25%E9%9B%AAaz%3F%C3%A9%250AAzz0\nduplicate=%20a&duplicate=z&empty=&prefix=%3Da%C3%A9%2Baa\nhost:example.test:9443\nx-amz-content-sha256:5753c21f5f9f329831cafe1968dd5bfb3bbba98273d6ffcc4586b0802d133f2d\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n5753c21f5f9f329831cafe1968dd5bfb3bbba98273d6ffcc4586b0802d133f2d",
+      "signature": "31b2b5c710ed9c14820bfcc36b9c464871ba268b60a0988c787873368ee6c256"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/%E9%9B%AA%C3%A9/A%3F%C3%A9A%25%25/%20%26%3D%3FA_%E9%9B%AA_%20%26/%2B%E9%9B%AA%26",
+      "query": [
+        [
+          "prefix",
+          "=éé%éé"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "test-session-token",
+      "canonical": "GET\n/bucket/%E9%9B%AA%C3%A9/A%3F%C3%A9A%25%25/%20%26%3D%3FA_%E9%9B%AA_%20%26/%2B%E9%9B%AA%26\nduplicate=%20a&duplicate=z&empty=&prefix=%3D%C3%A9%C3%A9%25%C3%A9%C3%A9\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "1865b1f9e553753cf97ce22caf1b6ff82c3d9792f1f4d31b13ab19714b1d5c41"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/.Z-0%E9%9B%AA.%E9%9B%AA-%C3%A9zz/%C3%A9Z%23Z%3D/%3F_%E9%9B%AA..%26",
+      "query": [
+        [
+          "prefix",
+          "=aéé  "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "670f05b57eb79a71f0e58dc0c811cce064ddd9d32dd1f63e89e54f80c6310810"
+        ]
+      ],
+      "payload": "payload-é-37",
+      "token": "",
+      "canonical": "PUT\n/bucket/.Z-0%E9%9B%AA.%E9%9B%AA-%C3%A9zz/%C3%A9Z%23Z%3D/%3F_%E9%9B%AA..%26\nduplicate=%20a&duplicate=z&empty=&prefix=%3Da%C3%A9%C3%A9%20%20\nhost:example.test:9443\nx-amz-content-sha256:670f05b57eb79a71f0e58dc0c811cce064ddd9d32dd1f63e89e54f80c6310810\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n670f05b57eb79a71f0e58dc0c811cce064ddd9d32dd1f63e89e54f80c6310810",
+      "signature": "db7876f5a992b78dd372760c0bbb513f4b72d3a520aa25952c0df937ffad6d75"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/z%26/%23.%C3%A9_%20%230%25./%20%E9%9B%AA%C3%A9z.-/%26%25a%26",
+      "query": [
+        [
+          "prefix",
+          "+= é=a"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "HEAD\n/bucket/z%26/%23.%C3%A9_%20%230%25./%20%E9%9B%AA%C3%A9z.-/%26%25a%26\nduplicate=%20a&duplicate=z&empty=&prefix=%2B%3D%20%C3%A9%3Da\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "7e34d4ee51f186178c4a23e6fe6b2688761bb60c8df33e5b1c9a67a902a4bf7b"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/%26z%20-%20a.%23.%23./09aaAz%20%25a9/0",
+      "query": [
+        [
+          "prefix",
+          " % a=="
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "2c4a61515f6704cc7fdf172e4ce4a4411348d5f01c52452d20270e9f4825a9b7"
+        ]
+      ],
+      "payload": "payload-é-39",
+      "token": "test-session-token",
+      "canonical": "DELETE\n/bucket/%26z%20-%20a.%23.%23./09aaAz%20%25a9/0\nduplicate=%20a&duplicate=z&empty=&prefix=%20%25%20a%3D%3D\nhost:example.test:9443\nx-amz-content-sha256:2c4a61515f6704cc7fdf172e4ce4a4411348d5f01c52452d20270e9f4825a9b7\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\n2c4a61515f6704cc7fdf172e4ce4a4411348d5f01c52452d20270e9f4825a9b7",
+      "signature": "06beecd79a8d0f3724b28c729d4a13fc6000dc9b80040e2c34b6ce594d04b7bb"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/%26Z%3D%2Ba.%20%C3%A9%3Fa%C3%A9z%2B%20%230%3D_a%23A%23%25%26",
+      "query": [
+        [
+          "prefix",
+          "aé%ééa"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "GET\n/bucket/%26Z%3D%2Ba.%20%C3%A9%3Fa%C3%A9z%2B%20%230%3D_a%23A%23%25%26\nduplicate=%20a&duplicate=z&empty=&prefix=a%C3%A9%25%C3%A9%C3%A9a\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "92ac828891c82f824ddbf7e8dd6bd95a98502a0329c6bb1b24dc34e0e3dd276f"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/azZa-%26%26Z%2B.Za%209%3D_a%C3%A9%20%3F9%E9%9B%AAA%25",
+      "query": [
+        [
+          "prefix",
+          "===%+a"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "6bc9dd472115b94765efab936df319cd52c9dce8867fa6e699c4a0fa54e101d3"
+        ]
+      ],
+      "payload": "payload-é-41",
+      "token": "",
+      "canonical": "PUT\n/bucket/azZa-%26%26Z%2B.Za%209%3D_a%C3%A9%20%3F9%E9%9B%AAA%25\nduplicate=%20a&duplicate=z&empty=&prefix=%3D%3D%3D%25%2Ba\nhost:example.test:9443\nx-amz-content-sha256:6bc9dd472115b94765efab936df319cd52c9dce8867fa6e699c4a0fa54e101d3\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n6bc9dd472115b94765efab936df319cd52c9dce8867fa6e699c4a0fa54e101d3",
+      "signature": "b4358f4fd9abc041fa0c917a325ff00357745276b4106bcc8fcaf240de1e2a03"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/%C3%A9A9AA%E9%9B%AA_Z%2B/-%26%3F%25%C3%A9AZ_/-0/-_",
+      "query": [
+        [
+          "prefix",
+          "%%==%+"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "test-session-token",
+      "canonical": "HEAD\n/bucket/%C3%A9A9AA%E9%9B%AA_Z%2B/-%26%3F%25%C3%A9AZ_/-0/-_\nduplicate=%20a&duplicate=z&empty=&prefix=%25%25%3D%3D%25%2B\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "bc6774136adba6bafdf32c7d18fafd5ddf2bcbd46b2265637ccb860e84349069"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/Aa%E9%9B%AA%E9%9B%AA--a.%23.%2BZ%3F0%3F%C3%A9%23%20A%C3%A9a%26/9",
+      "query": [
+        [
+          "prefix",
+          "=é=+a "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "362d7f0d70f5495b5f3b948b04fa430f4c19bbfdeace921156a7ed00b10c942e"
+        ]
+      ],
+      "payload": "payload-é-43",
+      "token": "",
+      "canonical": "DELETE\n/bucket/Aa%E9%9B%AA%E9%9B%AA--a.%23.%2BZ%3F0%3F%C3%A9%23%20A%C3%A9a%26/9\nduplicate=%20a&duplicate=z&empty=&prefix=%3D%C3%A9%3D%2Ba%20\nhost:example.test:9443\nx-amz-content-sha256:362d7f0d70f5495b5f3b948b04fa430f4c19bbfdeace921156a7ed00b10c942e\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n362d7f0d70f5495b5f3b948b04fa430f4c19bbfdeace921156a7ed00b10c942e",
+      "signature": "fcbae931572695e77d24f7d11e4ff3f198541ff39b1f85e49b6a03e7faf5606c"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/A%2B.%25-9%25%2B%20%23%C3%A9%2Bz%25_..%3D%230%E9%9B%AA/-%3F",
+      "query": [
+        [
+          "prefix",
+          " += a%"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "GET\n/bucket/A%2B.%25-9%25%2B%20%23%C3%A9%2Bz%25_..%3D%230%E9%9B%AA/-%3F\nduplicate=%20a&duplicate=z&empty=&prefix=%20%2B%3D%20a%25\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "c9a5ba18a10428d7db2a35fdb850d42fabad1f33737091ef57d82027aca9bc67"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/%25%26%E9%9B%AA%C3%A9-A%C3%A9%3D%3F/a%23%3D%E9%9B%AAZ%2B%3F%26%3F/%25%20.%2B",
+      "query": [
+        [
+          "prefix",
+          "a% %é "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "f2d020659425c11d1aaa3419ed1c0ecc757e267ff9d79ec1569c0e9c122a701a"
+        ]
+      ],
+      "payload": "payload-é-45",
+      "token": "test-session-token",
+      "canonical": "PUT\n/bucket/%25%26%E9%9B%AA%C3%A9-A%C3%A9%3D%3F/a%23%3D%E9%9B%AAZ%2B%3F%26%3F/%25%20.%2B\nduplicate=%20a&duplicate=z&empty=&prefix=a%25%20%25%C3%A9%20\nhost:example.test:9443\nx-amz-content-sha256:f2d020659425c11d1aaa3419ed1c0ecc757e267ff9d79ec1569c0e9c122a701a\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\nf2d020659425c11d1aaa3419ed1c0ecc757e267ff9d79ec1569c0e9c122a701a",
+      "signature": "d7083ec23dd17dd158f0903e2ba927b6f2d70131e586fc2cd3c540008b538216"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/-9%2B%26%3F0z%20%23%C3%A9Z%25%E9%9B%AA%3D%26%3D.%3F%20A.%26A-",
+      "query": [
+        [
+          "prefix",
+          "%a+=% "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "HEAD\n/bucket/-9%2B%26%3F0z%20%23%C3%A9Z%25%E9%9B%AA%3D%26%3D.%3F%20A.%26A-\nduplicate=%20a&duplicate=z&empty=&prefix=%25a%2B%3D%25%20\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "4196ae821c2f78063959e025cb90f4c2286b8a87c01caffecb69b7d9d1e98939"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket//%2BZ%26Zza_Z%23%230/99Z%26%2B%25%E9%9B%AA_0Z%C3%A9",
+      "query": [
+        [
+          "prefix",
+          "=é=a% "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "2d0f8cb0196309043fe7ff606968bb37db157e025e54959bf72147d62383c394"
+        ]
+      ],
+      "payload": "payload-é-47",
+      "token": "",
+      "canonical": "DELETE\n/bucket//%2BZ%26Zza_Z%23%230/99Z%26%2B%25%E9%9B%AA_0Z%C3%A9\nduplicate=%20a&duplicate=z&empty=&prefix=%3D%C3%A9%3Da%25%20\nhost:example.test:9443\nx-amz-content-sha256:2d0f8cb0196309043fe7ff606968bb37db157e025e54959bf72147d62383c394\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n2d0f8cb0196309043fe7ff606968bb37db157e025e54959bf72147d62383c394",
+      "signature": "4a848a096824cc0745465c5d21dd68cfd7f4d9efbc2fd4fa949b0d76431dfc0b"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/%E9%9B%AA-0%23a%23a%23%2B%3FA%3Da9/%23.0%3D%3F%C3%A9%25-%E9%9B%AA",
+      "query": [
+        [
+          "prefix",
+          "%é++éa"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "test-session-token",
+      "canonical": "GET\n/bucket/%E9%9B%AA-0%23a%23a%23%2B%3FA%3Da9/%23.0%3D%3F%C3%A9%25-%E9%9B%AA\nduplicate=%20a&duplicate=z&empty=&prefix=%25%C3%A9%2B%2B%C3%A9a\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "08f91bfc97f772ff209ed3a7df4c9ff37eafc750b02acff00e1fae02bba50ed3"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/Z%C3%A9.%23_z%C3%A9.%25%23%23%26Z0%3Dz%3D%3F%E9%9B%AA%3DZ%C3%A9%23%26",
+      "query": [
+        [
+          "prefix",
+          "  =%+%"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "a6611dd0045f0995f0d7e38a9efb3dabe26e24c6e8fedfe03987f26f6462b06a"
+        ]
+      ],
+      "payload": "payload-é-49",
+      "token": "",
+      "canonical": "PUT\n/bucket/Z%C3%A9.%23_z%C3%A9.%25%23%23%26Z0%3Dz%3D%3F%E9%9B%AA%3DZ%C3%A9%23%26\nduplicate=%20a&duplicate=z&empty=&prefix=%20%20%3D%25%2B%25\nhost:example.test:9443\nx-amz-content-sha256:a6611dd0045f0995f0d7e38a9efb3dabe26e24c6e8fedfe03987f26f6462b06a\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\na6611dd0045f0995f0d7e38a9efb3dabe26e24c6e8fedfe03987f26f6462b06a",
+      "signature": "3ba431b4bb813be8fcb49d0db8a08f5ff6d0741d6d2b31c62e4cda5600eadb59"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/%C3%A9_/%E9%9B%AAz09%3F0A-aA00%C3%A9Z_0%25%25a-/",
+      "query": [
+        [
+          "prefix",
+          "aé +a+"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "HEAD\n/bucket/%C3%A9_/%E9%9B%AAz09%3F0A-aA00%C3%A9Z_0%25%25a-/\nduplicate=%20a&duplicate=z&empty=&prefix=a%C3%A9%20%2Ba%2B\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "e85bc4b7b7a7d238aee0b6deda673b40d44936c83cb1cb211ac5c0a4d0544081"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/0-9%E9%9B%AA%3D.a%26%C3%A9%3Fz-aa%3D-%3D_9%26%25.%26A",
+      "query": [
+        [
+          "prefix",
+          "+a= +a"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "1a4338cf692610d697057b24c8e151cd1c50322444dea67e6733c0a0e46606d6"
+        ]
+      ],
+      "payload": "payload-é-51",
+      "token": "test-session-token",
+      "canonical": "DELETE\n/bucket/0-9%E9%9B%AA%3D.a%26%C3%A9%3Fz-aa%3D-%3D_9%26%25.%26A\nduplicate=%20a&duplicate=z&empty=&prefix=%2Ba%3D%20%2Ba\nhost:example.test:9443\nx-amz-content-sha256:1a4338cf692610d697057b24c8e151cd1c50322444dea67e6733c0a0e46606d6\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\n1a4338cf692610d697057b24c8e151cd1c50322444dea67e6733c0a0e46606d6",
+      "signature": "3c6a1614eb5ae696dd983fd33855f411ad181ca75a69bbc7a10702e720de9c1e"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/%2Ba%3F%23Zzz/%25/_%E9%9B%AAa%2B%3F%26%20%20%E9%9B%AA%E9%9B%AAa.%26%3F",
+      "query": [
+        [
+          "prefix",
+          "a +é+é"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "GET\n/bucket/%2Ba%3F%23Zzz/%25/_%E9%9B%AAa%2B%3F%26%20%20%E9%9B%AA%E9%9B%AAa.%26%3F\nduplicate=%20a&duplicate=z&empty=&prefix=a%20%2B%C3%A9%2B%C3%A9\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "963a39a3129f5edb38a55faaf1536ce817bae3802de81d52a7b40283126e3d7b"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/%26%C3%A9%E9%9B%AA%3F.A9%3DZ%3FZ-%3D//Z%3F%23z0A%3D%23%23",
+      "query": [
+        [
+          "prefix",
+          "=éa+%%"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "bbdc5daf9ccede68752a532040f6ac55d6d25879e41416314d27b17855f557a5"
+        ]
+      ],
+      "payload": "payload-é-53",
+      "token": "",
+      "canonical": "PUT\n/bucket/%26%C3%A9%E9%9B%AA%3F.A9%3DZ%3FZ-%3D//Z%3F%23z0A%3D%23%23\nduplicate=%20a&duplicate=z&empty=&prefix=%3D%C3%A9a%2B%25%25\nhost:example.test:9443\nx-amz-content-sha256:bbdc5daf9ccede68752a532040f6ac55d6d25879e41416314d27b17855f557a5\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\nbbdc5daf9ccede68752a532040f6ac55d6d25879e41416314d27b17855f557a5",
+      "signature": "7a2860502dc14e2081bfdae6dd6454b7a7f0e16d7169dff25f873a7a092feb38"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/%3D%23Z%20%E9%9B%AA0%26%23%E9%9B%AAZ%C3%A9%26A%23Z%2B0Za0%20z%C3%A9%C3%A9",
+      "query": [
+        [
+          "prefix",
+          "é% aé="
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "test-session-token",
+      "canonical": "HEAD\n/bucket/%3D%23Z%20%E9%9B%AA0%26%23%E9%9B%AAZ%C3%A9%26A%23Z%2B0Za0%20z%C3%A9%C3%A9\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%25%20a%C3%A9%3D\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "8542735cce7831ce4c0a52c34c95ba37a5efb2cce0a7778133d70927573c5d74"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/%E9%9B%AA/%3Da%26%20a%25Z_A%25z/%E9%9B%AA00%269%E9%9B%AAzA%E9%9B%AA%26",
+      "query": [
+        [
+          "prefix",
+          "é éaé%"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "4404d05fabc715298f5845926557832bc576dbc1472d6efcfd7704b07a5fca7a"
+        ]
+      ],
+      "payload": "payload-é-55",
+      "token": "",
+      "canonical": "DELETE\n/bucket/%E9%9B%AA/%3Da%26%20a%25Z_A%25z/%E9%9B%AA00%269%E9%9B%AAzA%E9%9B%AA%26\nduplicate=%20a&duplicate=z&empty=&prefix=%C3%A9%20%C3%A9a%C3%A9%25\nhost:example.test:9443\nx-amz-content-sha256:4404d05fabc715298f5845926557832bc576dbc1472d6efcfd7704b07a5fca7a\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n4404d05fabc715298f5845926557832bc576dbc1472d6efcfd7704b07a5fca7a",
+      "signature": "097d3d0a9a771fa6777c35219be0e4e4f75007b0e19e358f02014d028dc2f856"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/_z/%23_%23z/A%2B%C3%A9%20%26_.%C3%A9%3F%25a/zZ0z",
+      "query": [
+        [
+          "prefix",
+          " aa= %"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "GET\n/bucket/_z/%23_%23z/A%2B%C3%A9%20%26_.%C3%A9%3F%25a/zZ0z\nduplicate=%20a&duplicate=z&empty=&prefix=%20aa%3D%20%25\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "52ae2aec961dcc54245157a948da0f956f678aeb71c0ad54bfac19a2790c98b5"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/a%3D/%E9%9B%AA%3D%23%20a.aA%E9%9B%AA%3F%25.A%E9%9B%AA09za%E9%9B%AAa%20",
+      "query": [
+        [
+          "prefix",
+          "+ +=+a"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "d220f097ceaba93d6066880aaa21d5e6edea9b3a5266aba200b713034950d259"
+        ]
+      ],
+      "payload": "payload-é-57",
+      "token": "test-session-token",
+      "canonical": "PUT\n/bucket/a%3D/%E9%9B%AA%3D%23%20a.aA%E9%9B%AA%3F%25.A%E9%9B%AA09za%E9%9B%AAa%20\nduplicate=%20a&duplicate=z&empty=&prefix=%2B%20%2B%3D%2Ba\nhost:example.test:9443\nx-amz-content-sha256:d220f097ceaba93d6066880aaa21d5e6edea9b3a5266aba200b713034950d259\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\nd220f097ceaba93d6066880aaa21d5e6edea9b3a5266aba200b713034950d259",
+      "signature": "2104db9b0b6711645a3676514d9b42669ca0657479f399ef4ecbb7245379a14d"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/a%E9%9B%AA--%E9%9B%AA%20./%E9%9B%AAa-Z-AzzZ%C3%A9%2B%3F%26%23/%25",
+      "query": [
+        [
+          "prefix",
+          "aé%+é+"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "HEAD\n/bucket/a%E9%9B%AA--%E9%9B%AA%20./%E9%9B%AAa-Z-AzzZ%C3%A9%2B%3F%26%23/%25\nduplicate=%20a&duplicate=z&empty=&prefix=a%C3%A9%25%2B%C3%A9%2B\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "4f947db35ec9d8fe432ac8d72733079440f9d373e1292443a677bfb3584b68cd"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/9%20_//--//9%3D0%26%3DA%C3%A9%2B_%25Z0/%23%23",
+      "query": [
+        [
+          "prefix",
+          "a%   +"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "99a6ee3e69cb57890bb4d378c9aa02155491576740f90224231e4ce3930112d0"
+        ]
+      ],
+      "payload": "payload-é-59",
+      "token": "",
+      "canonical": "DELETE\n/bucket/9%20_//--//9%3D0%26%3DA%C3%A9%2B_%25Z0/%23%23\nduplicate=%20a&duplicate=z&empty=&prefix=a%25%20%20%20%2B\nhost:example.test:9443\nx-amz-content-sha256:99a6ee3e69cb57890bb4d378c9aa02155491576740f90224231e4ce3930112d0\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\n99a6ee3e69cb57890bb4d378c9aa02155491576740f90224231e4ce3930112d0",
+      "signature": "30bcc0981607c78a11e1609ec6886822caa4c072cbb86140186f65e4501a0df6"
+    },
+    {
+      "method": "GET",
+      "path": "/bucket/%3DZ9.%25%E9%9B%AA_%E9%9B%AA%25.%2B--%23A%20%23_/%E9%9B%AA%25%C3%A9%3F%26",
+      "query": [
+        [
+          "prefix",
+          "a=é+a "
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "test-session-token",
+      "canonical": "GET\n/bucket/%3DZ9.%25%E9%9B%AA_%E9%9B%AA%25.%2B--%23A%20%23_/%E9%9B%AA%25%C3%A9%3F%26\nduplicate=%20a&duplicate=z&empty=&prefix=a%3D%C3%A9%2Ba%20\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "9edd8b06c5838203fd4c18fbf2ae47a413603a158b6b8ac46aace059a63a1593"
+    },
+    {
+      "method": "PUT",
+      "path": "/bucket/%E9%9B%AA%2B%3DZ%20-%C3%A9..%2B-%25za%3D%3F%25__z%2B%2B9z",
+      "query": [
+        [
+          "prefix",
+          "%%+éaa"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e59fcec6859595b195e859257f9bf2bea4eab60c90b20f17fb46182146d84dc7"
+        ]
+      ],
+      "payload": "payload-é-61",
+      "token": "",
+      "canonical": "PUT\n/bucket/%E9%9B%AA%2B%3DZ%20-%C3%A9..%2B-%25za%3D%3F%25__z%2B%2B9z\nduplicate=%20a&duplicate=z&empty=&prefix=%25%25%2B%C3%A9aa\nhost:example.test:9443\nx-amz-content-sha256:e59fcec6859595b195e859257f9bf2bea4eab60c90b20f17fb46182146d84dc7\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne59fcec6859595b195e859257f9bf2bea4eab60c90b20f17fb46182146d84dc7",
+      "signature": "0f1511f9ed6a35ebb40f6d02123b4b313acbb270d77539b3c9fa007dcc2366c7"
+    },
+    {
+      "method": "HEAD",
+      "path": "/bucket/-z%E9%9B%AA%2B-a%3D%C3%A9%23A0%23A.0%20%26/0z09/%20",
+      "query": [
+        [
+          "prefix",
+          " aaa=é"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      ],
+      "payload": "",
+      "token": "",
+      "canonical": "HEAD\n/bucket/-z%E9%9B%AA%2B-a%3D%C3%A9%23A0%23A.0%20%26/0z09/%20\nduplicate=%20a&duplicate=z&empty=&prefix=%20aaa%3D%C3%A9\nhost:example.test:9443\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": "aa5bcab45e154482e63862598ba017a7db1d186b559dac665f397fa717875c28"
+    },
+    {
+      "method": "DELETE",
+      "path": "/bucket/z_0z0%25.0/%E9%9B%AAa%23a%E9%9B%AA_%3D%C3%A9%26A%E9%9B%AA%3D9%23%26",
+      "query": [
+        [
+          "prefix",
+          "=a+  +"
+        ],
+        [
+          "duplicate",
+          "z"
+        ],
+        [
+          "duplicate",
+          " a"
+        ],
+        [
+          "empty",
+          ""
+        ]
+      ],
+      "headers": [
+        [
+          "Host",
+          "example.test:9443"
+        ],
+        [
+          "X-Amz-Meta-Note",
+          "  a  b\t c  "
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          "first"
+        ],
+        [
+          "X-Amz-Meta-Duplicate",
+          " second  value "
+        ],
+        [
+          "X-Amz-Date",
+          "20261004T120000Z"
+        ],
+        [
+          "X-Amz-Security-Token",
+          "test-session-token"
+        ],
+        [
+          "X-Amz-Content-SHA256",
+          "ce5dea902709a409005a495872b9b0055d2e749b3696a0d729e30f54bf2c0590"
+        ]
+      ],
+      "payload": "payload-é-63",
+      "token": "test-session-token",
+      "canonical": "DELETE\n/bucket/z_0z0%25.0/%E9%9B%AAa%23a%E9%9B%AA_%3D%C3%A9%26A%E9%9B%AA%3D9%23%26\nduplicate=%20a&duplicate=z&empty=&prefix=%3Da%2B%20%20%2B\nhost:example.test:9443\nx-amz-content-sha256:ce5dea902709a409005a495872b9b0055d2e749b3696a0d729e30f54bf2c0590\nx-amz-date:20261004T120000Z\nx-amz-meta-duplicate:first,second value\nx-amz-meta-note:a b c\nx-amz-security-token:test-session-token\n\nhost;x-amz-content-sha256;x-amz-date;x-amz-meta-duplicate;x-amz-meta-note;x-amz-security-token\nce5dea902709a409005a495872b9b0055d2e749b3696a0d729e30f54bf2c0590",
+      "signature": "e9e45e4c50015b9cccf56b6bfaf23028289c1716820d30aacfe0d89bd1d05263"
+    }
+  ]
+}

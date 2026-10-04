@@ -1,0 +1,26 @@
+name: ThreadSanitizer runtime qualification
+on:
+  workflow_dispatch:
+jobs:
+  runtime-and-concurrency:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install compiler and native libraries
+        run: |
+          python -m pip install mojo==1.1.0
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev strace
+      - name: Strict runtime and native concurrency gate
+        env:
+          RUN_TSAN_TRACE: '1'
+        run: scripts/check-tsan
+      - name: Preserve runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitizer-runtime-evidence
+          path: build/sanitizers/

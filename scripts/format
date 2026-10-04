@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+mojo_s3_formatter="${MBLACK:-mblack}"
+if ! command -v "$mojo_s3_formatter" >/dev/null && [[ -x /workspace/mojo-toolchain/bin/mblack ]]; then
+    mojo_s3_formatter=/workspace/mojo-toolchain/bin/mblack
+fi
+exec "$mojo_s3_formatter" "$@" src tests examples scripts/*.py
