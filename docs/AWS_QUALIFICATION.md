@@ -30,3 +30,18 @@ Unicode keys, closed/open/suffix ranges, presigned GET/PUT, streamed file transf
 sequential and concurrent multipart, TransferManager selection/concurrent download,
 and four full-object checksum algorithms. KMS/DSSE, version administration and
 cross-account authorization are separate future authorized gates.
+
+
+The compiled convergence harness additionally tests Get/Put/DeleteObjectTagging,
+forced server-side multipart copy with integrity comparison, and explicit
+ListParts/ListMultipartUploads inspection followed by abort of only its known
+upload ID. Upload discovery is always prefix scoped. Grant object tagging access
+(GetObjectTagging, PutObjectTagging, DeleteObjectTagging),
+ListMultipartUploadParts/AbortMultipartUpload on the prefix's objects, and
+ListBucketMultipartUploads for the authorized bucket. Bucket-level IAM listing
+conditions may need owner review; the runner cannot modify policies. HeadBucket
+requires appropriate bucket access. No new bucket/account administration occurs.
+AssumeRole is independently signature-oracle tested but this harness does not
+assume a role automatically. Existing versioned/KMS account gates remain untested
+and require separately supplied, explicitly authorized resources; they are not
+created or configured here.

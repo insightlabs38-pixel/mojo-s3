@@ -153,3 +153,25 @@ No suppressions, test weakening or silent rerun-to-pass was used. Earlier passin
 strict candidate qualification remains preserved, with its limited consistency
 clearly stated. Strict check-tsan is byte-identical to baseline; released-Mojo
 TSan and a consistently clean entire native closure remain unqualified.
+
+
+## October 5 convergence isolation
+
+The historical warning above is preserved. A new independent C matrix separated
+uninstrumented OpenSSL synchronization visibility from a distinct cold allocation
+race. OpenSSL 3.5.7 release/acquire hash-table publication is invisible to TSan
+when that library is uninstrumented. Instrumenting the same OpenSSL source
+eliminated SHA/HMAC/RAND warnings in the matched controls. A separate eight-thread
+cold EVP allocation report remains at CRYPTO_malloc's unsynchronized
+allow_customize read/write, in 20/20 processes under both matched LLVM variants.
+Single-thread and warm controls are clean. This is a local OpenSSL issue draft,
+not a submitted upstream report and not an SDK fix by preinitialization.
+
+With rebuilt sanitizer-aware Modular AsyncRT/Support, matching unchanged nightly
+CompilerRT, newly rebuilt LLVM main TSan, and fully instrumented OpenSSL selected
+in an isolated dependency closure, the unchanged strict gate passed. This does
+not qualify released Mojo TSan or prove every uninstrumented dependency race-free.
+The original wheel and supported gate remain unchanged; no suppression or warm-up
+was introduced. Exact sources, loader/compile evidence, matched matrices and
+upstream drafts live outside this SDK repository. New API sanitizer evidence is
+recorded separately from the original gate.

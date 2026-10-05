@@ -22,6 +22,13 @@ candidate and no tag or upstream publication has been created.
 - Full-object SHA256/SHA1/CRC32/CRC32C; composite/unsupported integrity states.
 - Bounded atomic concurrent downloads, coordinator progress and multipart cancellation.
 - Explicit existing-bucket AWS harness and deterministic source-release dry run.
+- 64-bit dynamic multipart planning, streamed 5 MiB–5 GiB file parts and bounded
+  download scheduling with one owned outcome slot per worker.
+- Experimental server-side multipart copy, explicit tag-copy policy, multipart
+  inspection pagination and version-aware object-tag operations.
+- Experimental signed ordinary AssumeRole with source refresh and rejected chaining.
+- Coordinator cancellation without raw control pointers; wide-offset wire and
+  malformed multipart/copy/tag fault oracles.
 
 See STATUS.md and RELEASE_READINESS.md under docs for verification and pending
 qualification. TSan remains strictly gated on a usable upstream runtime.

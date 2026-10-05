@@ -103,3 +103,28 @@ Phase-2 typed object APIs and the experimental ownership/refresh/transfer stabil
 classification are detailed in [PHASE2.md](PHASE2.md). `presign` now borrows its
 store mutably to resolve expiring credentials. Source compatibility is tested;
 compiled package ABI compatibility is not promised.
+
+
+## Convergence surface review
+
+The additional root exports below are experimental in 0.1.0-dev. This explicitly
+keeps layout/signature evolution possible while provider and failure coverage
+matures; they are not a frozen RC API.
+
+| Surface | Status and contract |
+|---|---|
+| MultipartPlan, plan_multipart | Experimental; Int64 byte sizes, 1-based part access, allocation-free bounds |
+| UploadedPart, PartsPage, PartsPaginator, list_parts | Experimental; owned result fields, opaque ETags, bounded pages |
+| MultipartUpload, MultipartUploadsPage, MultipartUploadsPaginator, list_multipart_uploads | Experimental; owned IDs/keys and explicit markers, no implicit cleanup |
+| upload_part_copy, multipart_copy_object | Experimental; server-side payload-free copy, source pinning, explicit abort semantics |
+| get_object_tagging, put_object_tagging, delete_object_tagging | Experimental; optional opaque version ID; owned Field lists, maximum 10 unique tags |
+| CredentialSource.static / assume_role | Experimental; owned one-hop ordinary source provider, signed STS, no chaining |
+| ProgressObserver.cancel_requested | Experimental; coordinator cancellation without raw control aliases |
+| CopyOptions.tagging_directive | Experimental; independent COPY/REPLACE tag policy, including explicit empty replacement |
+| DownloadPlan/plan_download, UploadInput, TransferState, RoleSourceDescription, clock helpers | Internal; importability is not support |
+
+ObjectIdentifier(key, version_id="") now permits the common unversioned
+constructor. Existing explicit-version construction remains valid. Transfer
+controls/managers and all refreshing credential caches retain their experimental
+status. Consumer-visible native handles, callback addresses, worker structs,
+cache internals and underscore fields are not extension contracts.

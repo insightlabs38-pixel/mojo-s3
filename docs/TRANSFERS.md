@@ -1,8 +1,8 @@
 # Transfers and integrity
 
 All current transfers are synchronous. Use buffered `put` / `get` for small
-objects and `S3Store.upload_file` / `download_file` for large ones. There is no
-automatic multipart threshold or transfer-manager abstraction yet.
+objects and `S3Store.upload_file` / `download_file` for large ones. The experimental
+TransferManager selects streaming or multipart uploads by threshold.
 
 `upload_file(bucket, key, source, options=PutOptions())` hashes a seekable file in
 64 KiB chunks, then streams it via libcurl. It returns `PutResult`. Keep the source
@@ -29,13 +29,13 @@ var parallel = concurrent_multipart_upload_file(
 )
 ```
 
-The file helpers default to 8 MiB parts, accept 5–64 MiB parts and at most 10,000
-parts, and use ordinary PUT for empty files. A final part may be smaller than
+The file helpers default to 8 MiB parts, accept 5 MiB–5 GiB target parts and dynamically increase the part size to
+keep at most 10,000 parts, and use ordinary PUT for empty files. A final part may be smaller than
 5 MiB. The sequential helper keeps one part active. The concurrent helper accepts
 1–16 workers and uses at most the part count. Each worker owns its transport,
-store, descriptor and payload buffers. Payload memory is approximately two part
-buffers per active worker, plus transport/signing/result overhead; this is not a
-strict process RSS limit. Buffered PUT/GET similarly can have additional copies.
+store, descriptor and bounded stream buffers. File-range hashing and upload reads use
+64 KiB chunks rather than allocating entire parts; transport/signing/result
+overhead also consumes memory. This is not a strict process RSS limit. Buffered PUT/GET similarly can have additional copies.
 
 Workers stop queuing after failure and every started worker joins before abort
 or context cleanup. The parent store cannot be used simultaneously elsewhere.
@@ -63,10 +63,10 @@ Multipart composite checksums and unsupported algorithms are retained without
 verification. Negotiation does not currently add multipart checksum support.
 ETag is not an MD5 promise. A range response is not compared to a full-object
 checksum. `ObjectRange(start, end=-1)` supports closed and open-ended inclusive
-ranges; suffix ranges and file range downloads are pending.
+ranges; suffix ranges and concurrent file range downloads are available.
 
-Resumable state, generic source/sink traits, automatic multipart
-selection and resumable uploads are not currently implemented. Use independent
+Resumable state and generic source/sink traits are not implemented. Automatic
+multipart selection is available through TransferManager. Use independent
 stores for application-managed parallel object operations and bound memory and
 worker counts explicitly.
 
@@ -76,12 +76,17 @@ worker counts explicitly.
 upload mode automatically. Files below `multipart_threshold` use streamed PUT;
 nonempty files at or above it use sequential multipart with one worker or the
 existing concurrent helper with multiple workers. Empty files use ordinary PUT.
-Downloads use the existing streamed, verified, atomic replacement operation.
+Downloads use bounded validated ranges and atomic destination replacement.
 
 Defaults are a 64 MiB threshold, 8 MiB parts, four workers, and a 64 MiB configured
-part-buffer budget. Parts must be 5–64 MiB and workers 1–16; invalid settings and
-`workers * part_size > max_in_flight_bytes` fail before scheduling. This budget
-counts part data only: signing/request copies, per-worker response ceilings,
+buffer budget. Target parts must be 5 MiB–5 GiB and workers 1–16. The manager forces multipart above 5 GiB even if the configured threshold is
+larger. Upload
+validation requires at least 64 KiB per worker, independent of protocol part size.
+Download planning bounds ranges to 64 MiB, total range buffers to the budget,
+and scheduling to one million ranges, reducing workers or increasing ranges
+when needed. A budget too small for a huge ranged download fails before workers
+start; the low-level streamed download remains available. This budget excludes
+signing/request overhead, per-worker response ceilings,
 OpenSSL/libcurl state and allocator overhead add to RSS. It is not a process
 memory cap. The existing 10,000-part ceiling and cleanup semantics apply.
 
@@ -107,3 +112,40 @@ file, join all workers, verify final size/checksum, fsync and atomically replace
 Progress observers run on the coordinator; callback failure cancels work and joins
 before cleanup. Nonempty controlled uploads use multipart to support pre-commit
 abort. See [PHASE2.md](PHASE2.md) for lifetime, buffer-budget and commit boundaries.
+
+
+## Convergence additions (experimental)
+
+`plan_multipart(size_bytes: Int64, target_part_bytes)` plans without allocating
+payloads. Its protocol capacity is 10,000 × 5 GiB (about 48.8 TiB); source and
+service limits still apply. It validates negative sizes, overflow and target
+bounds. Files must remain unchanged through hashing, upload and retries.
+`upload_part_file` streams a specified file range. Synthetic boundary tests are
+separate from provider acceptance; the local wide wire oracle exercised a real
+5 GiB part and a 7-byte tail without allocating part-sized buffers.
+
+`TransferManager.copy_object` uses ordinary CopyObject through 5 GiB, then
+server-side multipart copy. `multipart_copy_object` explicitly forces the latter
+for nonempty objects. Source version/ETag is pinned, every part sends a signed
+copy range and no source payload, and failures attempt abort while retaining the
+primary structured error. Metadata COPY preserves returned common metadata;
+REPLACE uses caller values. `CopyOptions.tagging_directive` independently selects
+COPY or REPLACE. COPY requires GetObjectTagging; REPLACE with an empty tag list
+clears tags. Destination tags with COPY are rejected before mutation. Destination
+conditional PUT options remain unsupported for multipart initiation.
+
+`list_parts` / `PartsPaginator` and `list_multipart_uploads` /
+`MultipartUploadsPaginator` expose bounded pages, fail on malformed entries or
+nonadvancing markers, and never abort discovered uploads. Upload IDs and ETags
+are opaque; retain them exactly. These inspection APIs do not constitute safe
+resume by themselves; see [RESUME_DESIGN.md](RESUME_DESIGN.md).
+
+Observers run on the coordinator and can request cancellation by returning true
+from `cancel_requested()` after `on_progress`. They do not need an unsafe pointer
+to TransferControl. State, stop flags, contexts and exclusive worker outcomes
+live in preallocated owned heap storage until every started worker joins.
+Download result storage scales with worker count, not range count. Cancellation
+observed before rename/completion aborts or removes staging; a committed success
+is returned as success. Cancellation cannot promise rollback of a completed S3
+object. Cancellation does not interrupt an in-flight libcurl request; configured
+timeouts bound that wait.

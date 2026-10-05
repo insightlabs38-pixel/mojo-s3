@@ -1,4 +1,4 @@
-# SDK checkpoint — October 4, 2026
+# SDK checkpoint — October 5, 2026
 
 Version **0.1.0-dev** remains unreleased. SDK phase-2 work is on `sdk/s3-phase2`,
 based on `sdk/release-readiness` commit `44faa2af60d0e5f476bbc6138794a87b852bb8df`.
@@ -32,4 +32,16 @@ SDK/native-dependency race freedom is claimed.
 Source packaging is deterministic with checksums/build information and a gated
 manual dry-run workflow. No registry OIDC process is invented, token stored or
 package published. Three upstream investigation bundles remain separate, with
-recovery deletion contingent on actual downloadable artifact handoff.
+the original downloaded ZIPs remain byte-preserved. The authorized remote
+recovery branch was deleted; local recovery history remains.
+
+
+Convergence adds dynamic Int64 multipart planning and streamed file ranges,
+per-worker download result storage, server-side multipart copy, bounded upload
+inspection, version-aware tag operations and signed one-hop AssumeRole. These
+additional interfaces remain experimental. Current qualification and deferrals
+are consolidated in [CONVERGENCE.md](CONVERGENCE.md). The matched OpenSSL controls
+now distinguish invisible uninstrumented hash-table synchronization from a
+separate source-level cold allocation race. An isolated fully instrumented
+closure passes the unchanged strict gate; the released-toolchain limitation above
+remains. Exact-head hosted CI must be checked after the convergence push.

@@ -91,11 +91,13 @@ S3-compatible endpoints with explicit addressing configuration.
 
 ## Lifetime and unsupported providers
 
-Providers return owned credential snapshots. Configuration and stores retain that
-snapshot; they do not refresh expiring session credentials automatically.
-`CredentialProvider` permits future providers to resolve a fresh snapshot on each
-call, but does not yet define expiration, caching, refresh scheduling, or concurrent
-refresh coordination. Construct a new configuration/store when rotating credentials;
+Providers return owned credential snapshots. The static default chain retains that
+snapshot. Explicit experimental workload providers use an owned expiration-aware
+CredentialCache and refresh before signing; they never reuse expired credentials
+when refresh fails.
+`CredentialProvider` is the static provider extension contract; it does not
+provide automatic expiration semantics. Refreshing CredentialSource and caches
+are a separate experimental interface. Construct a new configuration/store when rotating credentials;
 never mutate a store concurrently.
 
 ECS, EC2 IMDS, web identity, AssumeRole/STS, SSO, `credential_process`, role chaining
@@ -107,3 +109,26 @@ and a token are provided by a supported source.
 Keep profile files private (normally mode `0600`), avoid committing credentials,
 and never print Authorization headers or presigned URLs. The executable example
 `examples/credentials.mojo` resolves configuration and prints no secrets.
+
+
+## Experimental signed AssumeRole
+
+`CredentialSource.assume_role(source, role_arn, session_name="mojo-s3",
+region="us-east-1", external_id="", duration_seconds=0, ...)` accepts an owned
+static, Web Identity, container, or IMDSv2 source. It independently refreshes source
+credentials before signing a bounded native STS POST, then caches expiring role
+credentials. The default endpoint is regional HTTPS with TLS verification; a
+custom CA is optional. Explicit loopback fixture HTTP is test-only. Requests use
+service `sts`, SigV4 and session tokens without exposing credentials in diagnostics.
+Duration 0 omits the parameter; explicit values are 900..43200 and remain subject
+to the role's service-side maximum. Session and external ID syntax are checked;
+AWS validates role ARN existence, account/policy and full semantic constraints.
+
+Role chaining and cycles are rejected rather than recursively resolving profiles.
+SSO, credential_process and source_profile role configuration remain unsupported.
+Programmatic static role sources use CredentialSource.static(Credentials(...));
+no remote provider is added to the static environment/default chain. Each store
+and cache has one active owner; parallel workers get independent owned copies.
+Structured STS HTTP errors use category CredentialRefresh and retain status/code/
+request ID. Credential refresh failure prevents signing the S3 request. Never log
+Authorization, tokens, secret keys or persisted provider state.

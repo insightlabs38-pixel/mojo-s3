@@ -44,3 +44,20 @@ obtain a supported released Modular runtime closure before claiming TSan support
 Versity conditional behavior remains a documented backend limitation. No current
 critical data-corruption defect has been identified by these scoped tests; this
 is not an exhaustive security/race audit.
+
+
+## October 5 convergence decision
+
+Keep 0.1.0-dev: new API layouts and provider contracts remain experimental, the
+large-object service boundary and optional AWS account features have no live AWS
+qualification, and backend multipart-copy/tag deviations remain documented.
+Supported released-Mojo TSan is not an RC gate; the decision instead follows API
+maturity and the missing integration evidence. Do not create a tag or publication
+from this checkpoint. See [CONVERGENCE.md](CONVERGENCE.md) for current evidence.
+
+Owner steps: review experimental interfaces and native dependency assumptions;
+provide an explicitly authorized existing AWS test bucket/prefix policy; execute
+the compiled opt-in harness and retain cleanup records; authorize any separately
+preconfigured versioned/KMS resource gate; review exact-head CI and deterministic
+source dry run; then choose a version/tag/publication in a future explicit step.
+Trusted publishing remains documentation/manual source-artifact dry-run only.

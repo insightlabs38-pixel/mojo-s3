@@ -38,3 +38,37 @@ fsync/atomic replacement received direct review and deterministic faults. No
 credential is logged. Local synthetic fixtures do not replace workload identity
 or KMS authorization testing on AWS. The unsuppressed intermittent OpenSSL TSan
 warning is retained, so native dependency race qualification is incomplete.
+
+
+## October 5 convergence delta (direct review)
+
+This remains a direct source review, not a formal security scan. New STS role
+sources are explicit owned one-hop descriptions; automatic role-profile chaining
+and cycles are rejected. Endpoint validation/HTTPS/redirect refusal and bounded
+requests/responses carry through to signed STS; refresh failures cannot sign a
+request with expired credentials. Synthetic signature-oracle fixtures verify
+source session tokens, source refresh, independent caches and structured denial.
+Credential strings are ordinary memory and are not zeroized; no secure-memory
+claim is made. Custom trusted endpoints are explicit caller configuration.
+
+New file-part callbacks check multiplication/range bounds and use pread with
+64 KiB reads. Offset plus length is checked before hashing, short reads fail,
+and no exception escapes a C callback. Multipart plans use subtract-before-ceil
+64-bit arithmetic and protocol limits rather than part-sized allocations.
+Download contexts, atomic state and stop flags are owned heap allocations held
+until all launched workers join; each worker has one exclusive outcome slot.
+The budget covers configured payload buffers, not whole-process memory, source
+locking or disk quotas. Source immutability remains a caller obligation.
+
+Copy ranges carry pinned source identity and encoded keys/opaque versions;
+HTTP-200 embedded errors fail and trigger abort. Abort failure preserves the
+primary structured error and reports an opaque orphan ID. Inspection pages
+validate counts/ordering/markers and do not mutate discovered uploads. Tag XML
+and PUT Content-MD5 are independently checked; service-specific Unicode and
+semantic limits are not treated as universal SDK support. Raw control aliases
+are no longer required for callback cancellation; observers use cancel_requested.
+
+Ordinary, ASan and isolated TSan fault oracles cover malformed lists, oversized
+part sizes, tag duplicates, copy errors/abort failures, credential refresh and
+streamed wide offsets. This does not prove race freedom or qualify untested AWS,
+ARM64/macOS, account policy, persisted resume or proprietary runtime selection.

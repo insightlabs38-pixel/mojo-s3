@@ -118,3 +118,5 @@ and [contributing](CONTRIBUTING.md). Executable [basic](examples/basic.mojo) and
 
 Source installation and registry evaluation: [INSTALLATION.md](docs/INSTALLATION.md).
 Current qualification and remaining release work: [RELEASE_READINESS.md](docs/RELEASE_READINESS.md).
+
+Current large-object, lifecycle, role-provider and sanitizer evidence: [convergence checkpoint](docs/CONVERGENCE.md). New APIs remain experimental; no release has been published.
