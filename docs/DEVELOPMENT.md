@@ -75,8 +75,9 @@ python scripts/run_fault_tests.py "$PWD/build/test_concurrent_asan"
 
 The TLS harness owns its ephemeral server/certificates/data and cleans them on
 exit. Native libcurl still verifies both CA and hostnames.
-ThreadSanitizer was attempted and fails independently in Mojo's allocator; see
-STATUS.md. ASan results are not a replacement for race qualification.
+Mojo 1.1.0 ThreadSanitizer fails independently in the packaged allocator; a
+separate matching-nightly rebuilt-runtime experiment passed the unchanged gate.
+See TSAN.md for the version boundary. ASan results are not a replacement for race qualification.
 The native `examples/benchmark.mojo` records actual object operations and validates
 large transfer hashes. See BENCHMARKS.md for conditions and observations.
 
@@ -87,4 +88,15 @@ ELF dependencies and mmap evidence under ignored `build/sanitizers/`, and fails
 before testing SDK concurrency if the minimal runtime fails. With a working
 runtime, enable `RUN_S3_INTEGRATION=1` and the existing bucket/unique-block source
 environment for real concurrent transfers. See [TSAN.md](TSAN.md); this gate is
-currently blocked on all tested userspaces, with no suppressions.
+blocked with the released Mojo 1.1.0 runtime, with no suppressions. The isolated
+nightly experiment is documented separately.
+
+
+## Release and new API checks
+
+Run `scripts/check-release` to validate version/changelog metadata, extract a
+source archive, install to a prefix containing spaces, and compile/run a consumer
+outside the checkout. This does not publish anything. `scripts/check` includes
+credential/profile/region, suffix-range/pagination, and transfer-policy fixtures
+and compiles all examples. Live checks additionally run transfer-manager file
+roundtrips when source/destination paths are set. See INSTALLATION.md and API.md.

@@ -100,6 +100,45 @@ def metadata_of(response: HttpResponse) raises -> ObjectMetadata:
     )
 
 
+def validate_range_response(
+    requested: ObjectRange, response: HttpResponse
+) raises -> ObjectMetadata:
+    """Validate status, Content-Range and exact body length before accepting bytes."""
+    requested.validate()
+    if response.status != 206:
+        raise Error("S3 server ignored Range request")
+    var range = get_header(response.headers, "content-range")
+    if not range.startswith("bytes "):
+        raise Error("Missing Content-Range")
+    var dash = range.find("-")
+    var slash = range.find("/")
+    if dash <= 6 or slash <= dash:
+        raise Error("Invalid Content-Range")
+    var start = decimal(String(range[byte=6:dash]))
+    var end = decimal(String(range[byte = dash + 1 : slash]))
+    var total = decimal(String(range[byte = slash + 1 :]))
+    var expected_start = (
+        max(0, total - requested.suffix_length) if requested.suffix_length
+        > 0 else requested.start
+    )
+    var expected_end = (
+        total - 1 if requested.suffix_length > 0
+        or requested.end < 0 else min(requested.end, total - 1)
+    )
+    var metadata = metadata_of(response)
+    if (
+        start != expected_start
+        or end != expected_end
+        or end < start
+        or end >= total
+        or end - start + 1 != len(response.body)
+        or metadata.size != len(response.body)
+    ):
+        raise Error("S3 range response does not match requested bytes")
+    metadata.size = total
+    return metadata^
+
+
 def full_sha256_checksum(response: HttpResponse) -> String:
     """Return only a whole-object digest that can be checked against body bytes."""
     var supplied = get_header(response.headers, "x-amz-checksum-sha256")
@@ -419,42 +458,12 @@ struct S3Store(ObjectStore):
     def get_range(
         mut self, bucket: String, key: String, requested: ObjectRange
     ) raises -> GetResult:
-        if (
-            requested.start < 0
-            or requested.end < -1
-            or (requested.end >= 0 and requested.end < requested.start)
-        ):
-            raise Error("Invalid object range")
+        requested.validate()
         var headers: List[Field] = [Field("range", requested.header())]
         var response = self.request(
             "GET", bucket, key, List[Field](), headers, List[UInt8]()
         )
-        if response.status != 206:
-            raise Error("S3 server ignored Range request")
-        var range = get_header(response.headers, "content-range")
-        if not range.startswith("bytes "):
-            raise Error("Missing Content-Range")
-        var dash = range.find("-")
-        var slash = range.find("/")
-        if dash <= 6 or slash <= dash:
-            raise Error("Invalid Content-Range")
-        var start = decimal(String(range[byte=6:dash]))
-        var end = decimal(String(range[byte = dash + 1 : slash]))
-        var total = decimal(String(range[byte = slash + 1 :]))
-        var expected_end = total - 1 if requested.end < 0 else min(
-            requested.end, total - 1
-        )
-        var metadata = metadata_of(response)
-        if (
-            start != requested.start
-            or end != expected_end
-            or end < start
-            or end >= total
-            or end - start + 1 != len(response.body)
-            or metadata.size != len(response.body)
-        ):
-            raise Error("S3 range response does not match requested bytes")
-        metadata.size = total
+        var metadata = validate_range_response(requested, response)
         var data = response.body^
         response.body = List[UInt8]()
         return GetResult(data^, metadata^)

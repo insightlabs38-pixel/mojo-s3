@@ -63,5 +63,23 @@ checksums/corruption, TLS trust, timeouts, connection reuse, and delta/date retr
 AddressSanitizer passes the worker failure suite and real MinIO multipart. Mojo
 1.1.0 ThreadSanitizer aborts in tcmalloc before even a minimal print program runs,
 with the same failure outside the sandbox and in clean Ubuntu 24.04/Debian 12
-userspaces. Dynamic race-sanitizer qualification remains blocked. The strict
+userspaces. Released-runtime dynamic race-sanitizer qualification remains blocked; an
+isolated matching-nightly rebuilt-runtime experiment passed the unchanged
+baseline gate and extended live checks. The strict
 execution gate and traced allocator/interceptor diagnosis are in [TSAN.md](TSAN.md).
+
+
+## Release-readiness refresh
+
+The October 4 local continuation reran the updated common contract, including
+suffix ranges (one byte and larger than the object) and `ListPaginator`, on
+MinIO, Versity 1.0.16 POSIX and ZEROS3. All three transfer-manager selections
+passed 32 MiB hash roundtrips on all three. Versity streaming and sequential/
+concurrent multipart also passed in the refresh. ZEROS3 extended keys, streaming, sequential/concurrent
+multipart, bidirectional boto3 interoperability and verified virtual-host TLS
+passed again. MinIO local STS, full-object checksums and multiprocess stress
+passed. ASan passed native threads, failure/cleanup, the updated common contract,
+manager roundtrips, 1/2/4/8-worker multipart and verified HTTPS.
+
+These current results use stable Mojo 1.1.0. The isolated TSan runtime evidence
+uses the exact nightly and unchanged baseline specified in TSAN.md. These results do not qualify additional platforms or Versity checksum behavior.

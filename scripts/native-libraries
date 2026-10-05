@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Sourced by repository and installed build helpers. No SDK runtime subprocesses.
+mojo_s3_find_library() {
+    if command -v ldconfig >/dev/null 2>&1; then
+        ldconfig -p | awk -v name="$1" '$1 == name && !found { print $NF; found=1 }'
+    else
+        echo 'ldconfig unavailable; set CRYPTO_LIBRARY, CURL_LIBRARY and XML_LIBRARY' >&2
+    fi
+}
+mojo_s3_crypto="${CRYPTO_LIBRARY:-$(mojo_s3_find_library libcrypto.so.3)}"
+mojo_s3_curl="${CURL_LIBRARY:-$(mojo_s3_find_library libcurl.so.4)}"
+mojo_s3_xml="${XML_LIBRARY:-$(mojo_s3_find_library libxml2.so.2)}"
+for mojo_s3_library in "$mojo_s3_crypto" "$mojo_s3_curl" "$mojo_s3_xml"; do
+    [[ -f "$mojo_s3_library" ]] || { echo 'Missing native library; see docs/DEPENDENCIES.md or set library overrides' >&2; return 1; }
+done

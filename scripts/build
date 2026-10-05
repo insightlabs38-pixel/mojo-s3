@@ -5,15 +5,7 @@ if [[ $# -lt 2 ]]; then
     echo 'Usage: scripts/build SOURCE.mojo OUTPUT [COMPILER_FLAGS...]' >&2
     exit 2
 fi
-library_path() {
-    ldconfig -p | awk -v name="$1" '$1 == name && !found { print $NF; found=1 }'
-}
-mojo_s3_crypto="${CRYPTO_LIBRARY:-$(library_path libcrypto.so.3)}"
-mojo_s3_curl="${CURL_LIBRARY:-$(library_path libcurl.so.4)}"
-mojo_s3_xml="${XML_LIBRARY:-$(library_path libxml2.so.2)}"
-for library in "$mojo_s3_crypto" "$mojo_s3_curl" "$mojo_s3_xml"; do
-    [[ -f "$library" ]] || { echo 'Missing OpenSSL/libcurl/libxml2 library; see README' >&2; exit 1; }
-done
+source ./scripts/native-libraries
 mojo_s3_source="$1"
 mojo_s3_output="$2"
 shift 2

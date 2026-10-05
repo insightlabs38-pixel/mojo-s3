@@ -1,0 +1,26 @@
+{
+  "name": "mojo-s3",
+  "version": "0.1.0-dev",
+  "description": "Native S3/object-storage SDK for Mojo",
+  "license": "MIT",
+  "repository": "https://github.com/insightlabs38-pixel/mojo-s3",
+  "mojo": "1.1.0",
+  "platforms": [
+    "linux-x86_64"
+  ],
+  "native_dependencies": [
+    "libcurl.so.4",
+    "libcrypto.so.3",
+    "libxml2.so.2"
+  ],
+  "distribution": "source",
+  "authors": [
+    "insightlabs38-pixel"
+  ],
+  "keywords": [
+    "mojo",
+    "s3",
+    "object-storage",
+    "native"
+  ]
+}

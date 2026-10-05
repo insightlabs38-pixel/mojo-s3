@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+mojo_s3_version="$(cat VERSION)"
+mojo_s3_output="${1:-build/mojo-s3-${mojo_s3_version}.tar.gz}"
+mkdir -p "$(dirname "$mojo_s3_output")"
+mojo_s3_stage="$(mktemp -d)"
+trap 'rm -rf "$mojo_s3_stage"' EXIT
+mojo_s3_name="mojo-s3-${mojo_s3_version}"
+mkdir "$mojo_s3_stage/$mojo_s3_name"
+cp -R src scripts tests examples docs README.md LICENSE VERSION package.json CHANGELOG.md CONTRIBUTING.md "$mojo_s3_stage/$mojo_s3_name/"
+# Source packages exclude local interpreter caches and never contain compiled .mojoc files.
+find "$mojo_s3_stage" -type d -name __pycache__ -prune -exec rm -rf '{}' +
+tar -czf "$mojo_s3_output" -C "$mojo_s3_stage" "$mojo_s3_name"
+echo "$mojo_s3_output"

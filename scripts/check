@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.."
 ./scripts/format --check
 mkdir -p build
 ./scripts/mojo precompile -I src src/mojo_s3 -o build/mojo_s3.mojoc
-for test in crypto signing signing_differential xml protocol retry multipart properties threads; do
+for test in crypto signing signing_differential xml protocol retry multipart properties threads credentials ranges_pagination transfers; do
     ./scripts/build "tests/test_${test}.mojo" "build/test_${test}"
     "build/test_${test}"
 done
@@ -21,7 +21,7 @@ if [[ "${RUN_S3_INTEGRATION:-0}" == 1 ]]; then
     ./scripts/build tests/test_integration.mojo build/test_integration
     build/test_integration
     if [[ -n "${S3_STREAM_SOURCE:-}" && -n "${S3_STREAM_DESTINATION:-}" ]]; then
-        for test in streaming multipart_integration concurrent_integration; do
+        for test in streaming multipart_integration concurrent_integration transfers_integration; do
             ./scripts/build "tests/test_${test}.mojo" "build/test_${test}"
             "build/test_${test}"
         done

@@ -4,6 +4,14 @@ from std.ffi import external_call
 from std.memory import Pointer
 from std.collections import List
 from mojo_s3.signing import Credentials
+from mojo_s3.credentials import (
+    EnvironmentCredentials,
+    default_credentials,
+    aws_profile,
+    shared_file_path,
+    read_profile_file,
+    profile_value,
+)
 
 
 struct S3Config(Copyable, Movable):
@@ -44,17 +52,82 @@ struct S3Config(Copyable, Movable):
         self.request_checksums = request_checksums
 
     @staticmethod
+    def aws(
+        credentials: Credentials, region: String = "us-east-1"
+    ) raises -> Self:
+        """AWS HTTPS endpoint defaults; generic endpoints remain explicit."""
+        return Self(aws_endpoint(region), region, credentials, True)
+
+    @staticmethod
     def from_env() raises -> Self:
+        """Environment-only credentials; use from_default for AWS profile files."""
+        var provider = EnvironmentCredentials()
+        var region = environment_region()
+        var endpoint = getenv("S3_ENDPOINT")
+        if not endpoint:
+            endpoint = aws_endpoint(region)
         return Self(
-            getenv("S3_ENDPOINT", "https://s3.amazonaws.com"),
-            getenv("S3_REGION", getenv("AWS_REGION", "us-east-1")),
-            Credentials(
-                getenv("S3_ACCESS_KEY", getenv("AWS_ACCESS_KEY_ID")),
-                getenv("S3_SECRET_KEY", getenv("AWS_SECRET_ACCESS_KEY")),
-                getenv("S3_SESSION_TOKEN", getenv("AWS_SESSION_TOKEN")),
-            ),
-            getenv("S3_FORCE_PATH_STYLE", "true") == "false",
+            endpoint,
+            region,
+            provider.resolve(),
+            environment_virtual_host(),
         )
+
+    @staticmethod
+    def from_default() raises -> Self:
+        """Environment then shared credentials/config file static credentials."""
+        var region = environment_region(False)
+        if not region:
+            region = profile_value(
+                read_profile_file(
+                    shared_file_path(True), Bool(getenv("AWS_CONFIG_FILE"))
+                ),
+                aws_profile(),
+                "region",
+                True,
+            )
+        if not region:
+            region = "us-east-1"
+        var endpoint = getenv("S3_ENDPOINT")
+        if not endpoint:
+            endpoint = aws_endpoint(region)
+        return Self(
+            endpoint,
+            region,
+            default_credentials(),
+            environment_virtual_host(),
+        )
+
+
+def environment_region(use_default: Bool = True) -> String:
+    return getenv(
+        "S3_REGION",
+        getenv(
+            "AWS_REGION",
+            getenv("AWS_DEFAULT_REGION", "us-east-1" if use_default else ""),
+        ),
+    )
+
+
+def environment_virtual_host() raises -> Bool:
+    var style = getenv(
+        "S3_FORCE_PATH_STYLE", "true" if getenv("S3_ENDPOINT") else "false"
+    )
+    if style != "true" and style != "false":
+        raise Error("S3_FORCE_PATH_STYLE must be true or false")
+    return style == "false"
+
+
+def aws_endpoint(region: String) raises -> String:
+    if not region:
+        raise Error("AWS region is required")
+    for b in region.as_bytes():
+        if not (b >= 97 and b <= 122 or b >= 48 and b <= 57 or b == 45):
+            raise Error("Invalid AWS region")
+    var suffix = ".amazonaws.com.cn" if region.startswith(
+        "cn-"
+    ) else ".amazonaws.com"
+    return "https://s3." + region + suffix
 
 
 comptime Raw = Pointer[UInt8, MutUntrackedOrigin]

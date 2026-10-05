@@ -1,7 +1,13 @@
 """Provider-neutral contract: implementations only need ObjectStore."""
 from std.collections import List
 from std.testing import assert_equal, assert_true, assert_false
-from mojo_s3.objects import ObjectStore, PutOptions, ListOptions, ObjectRange
+from mojo_s3.objects import (
+    ObjectStore,
+    PutOptions,
+    ListOptions,
+    ObjectRange,
+    ListPaginator,
+)
 from mojo_s3.protocol import Field, get_header
 from mojo_s3.crypto import bytes_of, sha256_hex
 
@@ -73,6 +79,12 @@ def run_contract[
             token = page.next_token
             assert_true(count <= len(keys) + 2)
         assert_equal(count, len(keys) + 2)
+        var paginator = ListPaginator(bucket, ListOptions(prefix, "", 3))
+        var paginated_count = 0
+        while not paginator.done:
+            var page = paginator.next_page(store)
+            paginated_count += len(page.objects)
+        assert_equal(paginated_count, count)
         var dirs = store.list(bucket, ListOptions(prefix, "/"))
         assert_true(len(dirs.prefixes) > 0)
         var name = prefix + keys[0]
@@ -82,6 +94,12 @@ def run_contract[
         var last = store.get_range(bucket, name, ObjectRange(len(data) - 1))
         assert_equal(len(last.data), 1)
         assert_equal(last.data[0], data[len(data) - 1])
+        var suffix = store.get_range(bucket, name, ObjectRange.suffix(1))
+        assert_equal(suffix.data[0], data[len(data) - 1])
+        var suffix_full = store.get_range(
+            bucket, name, ObjectRange.suffix(len(data) + 10)
+        )
+        assert_equal(sha256_hex(suffix_full.data), sha256_hex(data))
         var middle = store.get_range(bucket, name, ObjectRange(123, 1024))
         assert_equal(len(middle.data), 902)
         for i in range(len(middle.data)):

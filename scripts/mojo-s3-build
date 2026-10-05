@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ $# -lt 2 ]]; then
+    echo 'Usage: mojo-s3-build SOURCE.mojo OUTPUT [COMPILER_FLAGS...]' >&2
+    exit 2
+fi
+mojo_s3_prefix="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$mojo_s3_prefix/share/mojo-s3/native-libraries"
+mojo_s3_source="$1"
+mojo_s3_output="$2"
+shift 2
+mkdir -p "$(dirname "$mojo_s3_output")"
+exec "${MOJO:-mojo}" build -I "$mojo_s3_prefix/include/mojo" -Xlinker "$mojo_s3_crypto" -Xlinker "$mojo_s3_curl" -Xlinker "$mojo_s3_xml" "$@" "$mojo_s3_source" -o "$mojo_s3_output"

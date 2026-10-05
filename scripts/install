@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ $# != 2 || "$1" != --prefix || -z "$2" ]]; then
+    echo 'Usage: scripts/install --prefix PREFIX' >&2
+    exit 2
+fi
+mojo_s3_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+mojo_s3_prefix="$2"
+mkdir -p "$mojo_s3_prefix/include/mojo" "$mojo_s3_prefix/bin" "$mojo_s3_prefix/share/mojo-s3"
+# Refuse mixed or stale source versions rather than partially overwrite an install.
+if [[ -e "$mojo_s3_prefix/include/mojo/mojo_s3" ]]; then
+    echo 'mojo_s3 already exists under this prefix; install into a fresh prefix' >&2
+    exit 1
+fi
+cp -R "$mojo_s3_root/src/mojo_s3" "$mojo_s3_prefix/include/mojo/"
+cp "$mojo_s3_root/scripts/mojo-s3-build" "$mojo_s3_prefix/bin/"
+cp "$mojo_s3_root/scripts/native-libraries" "$mojo_s3_root/VERSION" "$mojo_s3_root/LICENSE" "$mojo_s3_root/package.json" "$mojo_s3_prefix/share/mojo-s3/"
+chmod +x "$mojo_s3_prefix/bin/mojo-s3-build"
+echo "Installed source SDK; build consumers with $mojo_s3_prefix/bin/mojo-s3-build"

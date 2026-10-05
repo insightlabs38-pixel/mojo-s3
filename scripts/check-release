@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+python3 - <<'PY'
+import json
+from pathlib import Path
+v=Path('VERSION').read_text().strip()
+m=json.loads(Path('package.json').read_text())
+assert m['version']==v and m['license']=='MIT'
+assert f'## {v}' in Path('CHANGELOG.md').read_text()
+assert m['mojo']=='1.1.0' and m['platforms']==['linux-x86_64']
+print('Release metadata consistent; version',v)
+PY
+mojo_s3_stage="$(mktemp -d)"
+trap 'rm -rf "$mojo_s3_stage"' EXIT
+scripts/package "$mojo_s3_stage/source.tar.gz"
+tar -xzf "$mojo_s3_stage/source.tar.gz" -C "$mojo_s3_stage"
+mojo_s3_version="$(cat VERSION)"
+"$mojo_s3_stage/mojo-s3-$mojo_s3_version/scripts/install" --prefix "$mojo_s3_stage/install with spaces"
+cat > "$mojo_s3_stage/consumer.mojo" <<'MOJO'
+from mojo_s3 import S3Config, Credentials, ObjectRange, S3Store, TransferManager, TransferOptions
+from mojo_s3.crypto import sha256_hex, bytes_of
+from std.testing import assert_true
+
+def main() raises:
+    var config = S3Config("https://s3.example.com", "us-east-1", Credentials("fixture", "fixture", ""))
+    assert_true(config.region == "us-east-1")
+    assert_true(ObjectRange(1, 2).header() == "bytes=1-2")
+    var store = S3Store(config)
+    var manager = TransferManager(store^, TransferOptions())
+    assert_true(not manager.options.uses_multipart(0))
+    assert_true(sha256_hex(bytes_of("abc")) == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
+    print("Clean installed source consumer passed")
+MOJO
+# The installed source is compiled from outside the checkout and does not use -I src.
+(cd "$mojo_s3_stage" && "$mojo_s3_stage/install with spaces/bin/mojo-s3-build" consumer.mojo consumer)
+"$mojo_s3_stage/consumer"
+if "$mojo_s3_stage/mojo-s3-$mojo_s3_version/scripts/install" --prefix "$mojo_s3_stage/install with spaces"; then
+    echo 'Repeated installation should refuse mixed source versions' >&2
+    exit 1
+fi

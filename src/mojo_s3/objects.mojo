@@ -93,14 +93,37 @@ struct ListOptions(Copyable, Movable):
 struct ObjectRange(Copyable, Movable):
     var start: Int
     var end: Int
+    var suffix_length: Int
 
     def __init__(out self, start: Int, end: Int = -1) raises:
         if start < 0 or end < -1 or (end >= 0 and end < start):
             raise Error("Invalid object range")
         self.start = start
         self.end = end
+        self.suffix_length = 0
+
+    @staticmethod
+    def suffix(length: Int) raises -> ObjectRange:
+        """Request the last length bytes; lengths larger than the object clamp."""
+        if length <= 0:
+            raise Error("Suffix range length must be positive")
+        var result = ObjectRange(0)
+        result.suffix_length = length
+        return result^
+
+    def validate(self) raises:
+        if (
+            self.start < 0
+            or self.end < -1
+            or (self.end >= 0 and self.end < self.start)
+            or self.suffix_length < 0
+            or (self.suffix_length > 0 and (self.start != 0 or self.end != -1))
+        ):
+            raise Error("Invalid object range")
 
     def header(self) -> String:
+        if self.suffix_length > 0:
+            return "bytes=-" + String(self.suffix_length)
         return (
             "bytes="
             + String(self.start)
@@ -140,3 +163,55 @@ trait ObjectStore(Movable):
         mut self, bucket: String, key: String, requested: ObjectRange
     ) raises -> GetResult:
         ...
+
+
+struct ListPaginator(Movable):
+    """Fetch one bounded page at a time, retaining only continuation state.
+
+    Each returned ListResult preserves objects, common prefixes, truncation,
+    and the server token. Stop when done becomes True. Errors leave state
+    unchanged so callers can retry. A server token that fails to advance is
+    rejected; max_pages bounds longer token cycles as well.
+    """
+
+    var bucket: String
+    var options: ListOptions
+    var done: Bool
+    var pages_loaded: Int
+    var max_pages: Int
+
+    def __init__(
+        out self,
+        bucket: String,
+        var options: ListOptions = ListOptions(),
+        max_pages: Int = 1000000,
+    ) raises:
+        if options.max_keys < 1 or options.max_keys > 1000:
+            raise Error("max_keys must be 1..1000")
+        if max_pages < 1:
+            raise Error("max_pages must be positive")
+        self.bucket = bucket
+        self.options = options^
+        self.done = False
+        self.pages_loaded = 0
+        self.max_pages = max_pages
+
+    def next_page[
+        Store: ObjectStore
+    ](mut self, mut store: Store) raises -> ListResult:
+        if self.done:
+            raise Error("Listing pagination is complete")
+        if self.pages_loaded >= self.max_pages:
+            raise Error("Listing pagination exceeded max_pages")
+        var page = store.list(self.bucket, self.options)
+        if page.truncated and (
+            not page.next_token
+            or page.next_token == self.options.continuation_token
+        ):
+            raise Error("Truncated listing continuation token did not advance")
+        self.options.continuation_token = (
+            page.next_token if page.truncated else ""
+        )
+        self.done = not page.truncated
+        self.pages_loaded += 1
+        return page^

@@ -1,9 +1,24 @@
 # ThreadSanitizer runtime qualification
 
-Mojo's ThreadSanitizer runtime is **not qualified**. The SDK remains frozen at its
-verified ordinary/AddressSanitizer implementation while this prerequisite fails.
-No SDK concurrency logic, existing tests, sanitizer checks, or suppressions were
-changed to obtain a passing result.
+Mojo 1.1.0's unmodified packaged runtime still aborts before user main under
+ThreadSanitizer. It is not dynamically qualified. The strict `scripts/check-tsan`
+gate remains unchanged.
+
+An isolated local experiment on October 4, 2026 successfully qualified the
+unchanged SDK at `1c8afa72581e51c1437d6cfedbea4d0a814fb607` with the exact matching
+Mojo nightly **1.2.0.dev2026100406 (1b9d9b9b)**, a corrected LLVM TSan interceptor,
+and rebuilt sanitizer-instrumented Modular AsyncRT/Support dependencies. A real
+intentional Mojo race was detected with exit 66 before running SDK tests.
+Repeated hello/constructor probes, the unchanged strict gate, live 1/2/4/8-worker
+multipart, failure/cleanup tests, local temporary credentials, verified HTTPS
+with a custom CA, and multiprocess stress all passed. No SDK test, suppression
+or instrumentation check was weakened to obtain this baseline result.
+
+This is experimental evidence for that pinned dependency closure, not a fixed
+released toolchain, arbitrary cross-version ABI guarantee or proof of race freedom.
+Research, rebuilt libraries, toolchain selection and detailed logs remain outside
+this SDK. Ordinary installation does not install or select experimental runtimes.
+Use a supported upstream fixed runtime for release qualification when available.
 
 ## Reproduce and resume
 
@@ -111,5 +126,6 @@ checks would not resolve the observed incompatible address selection. A working
 Mojo release/runtime with TSan-compatible allocator initialization is required;
 the installed binary distribution does not provide a supported allocator switch.
 No binary patch, preload allocator shim, mmap interception bypass, sanitizer
-suppression, or race-free claim is included. Run the strict gate with an upstream
-fixed toolchain before resuming production source changes and closing Gate I.
+suppression, or race-free claim is included. Run the unchanged strict gate with an upstream-fixed supported toolchain before
+claiming released-runtime qualification. The isolated experiment above advances
+local investigation without changing this released-runtime limitation.
