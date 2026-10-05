@@ -683,7 +683,7 @@ struct S3Store(ObjectStore):
             Field("X-Amz-Algorithm", "AWS4-HMAC-SHA256"),
             Field(
                 "X-Amz-Credential",
-                self.config.credentials.access_key + "/" + scope,
+                credentials.access_key + "/" + scope,
             ),
             Field("X-Amz-Date", timestamp),
             Field("X-Amz-Expires", String(expires)),

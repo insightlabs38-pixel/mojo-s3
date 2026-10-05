@@ -11,7 +11,14 @@ import threading
 import time
 import urllib.parse
 
-state = {"credentials": 0, "objects": 0, "imds": 0, "sts": 0}
+state = {
+    "credentials": 0,
+    "objects": 0,
+    "imds": 0,
+    "sts": 0,
+    "retry_credentials": 0,
+    "retry_objects": 0,
+}
 
 
 def snapshot(expired=False):
@@ -28,10 +35,12 @@ def snapshot(expired=False):
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
-    def reply(self, body, status=200):
+    def reply(self, body, status=200, retry_after=None):
         data = body.encode()
         self.send_response(status)
         self.send_header("Content-Length", str(len(data)))
+        if retry_after is not None:
+            self.send_header("Retry-After", str(retry_after))
         self.end_headers()
         try:
             self.wfile.write(data)
@@ -74,6 +83,27 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.reply(json.dumps(snapshot()))
         elif self.path == "/denied":
             self.reply("denied", 403)
+        elif self.path == "/retry-credentials":
+            state["retry_credentials"] += 1
+            value = snapshot()
+            value["AccessKeyId"] = f'retry-key-{state["retry_credentials"]}'
+            value["Token"] = f'retry-token-{state["retry_credentials"]}'
+            self.reply(json.dumps(value))
+        elif self.path.endswith("/expires-between-attempts"):
+            state["retry_objects"] += 1
+            attempt = state["retry_objects"]
+            assert (
+                self.headers["X-Amz-Security-Token"] == f'retry-token-{attempt}'
+            )
+            assert (
+                f'Credential=retry-key-{attempt}/'
+                in self.headers["Authorization"]
+            )
+            self.reply(
+                "retry" if attempt == 1 else "ok",
+                503 if attempt == 1 else 200,
+                2 if attempt == 1 else None,
+            )
         elif self.path == "/malformed":
             self.reply('{"AccessKeyId":"fixture"}')
         elif self.path == "/expired":
@@ -113,6 +143,9 @@ with tempfile.TemporaryDirectory(prefix="mojo-identity-") as tmp:
                 ),
             )
             assert state["sts"] == 1 and state["imds"] == 1
-            assert state["credentials"] == 2 and state["objects"] == 2
+            assert state["credentials"] == 3 and state["objects"] == 2
+            assert (
+                state["retry_credentials"] == 2 and state["retry_objects"] == 2
+            )
         finally:
             server.shutdown()

@@ -7,7 +7,8 @@ patches remain outside SDK history. No release/tag/upstream issue/PR was created
 
 Baseline hosted CI [37248323851](https://github.com/insightlabs38-pixel/mojo-s3/actions/runs/37248323851)
 passed ordinary checks, examples, source installation, MinIO, ZEROS3 and ASan.
-Current phase-2 run evidence is linked in RELEASE_READINESS.md after branch push.
+Phase-2 [hosted CI](https://github.com/insightlabs38-pixel/mojo-s3/actions?query=branch%3Asdk%2Fs3-phase2)
+tracks the pushed branch; check the exact commit and completed conclusion.
 
 New typed copy/batch delete/HeadBucket, conditions/opaque versions, object storage/
 encryption options, four full-object checksums, experimental refreshing workload

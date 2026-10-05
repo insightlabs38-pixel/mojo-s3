@@ -42,6 +42,35 @@ def main() raises:
     var other = store.config.copy()
     store.config.credential_cache.snapshot = None
     assert_true(Bool(other.credential_cache.snapshot))
+    store.config.credentials = Credentials(
+        "stale-key", "stale-secret", "stale-token"
+    )
+    var url = store.presign("GET", "bucket", "refresh-presign", 60)
+    assert_true("X-Amz-Credential=fixture-key%2F" in url)
+    assert_true("stale-key" not in url)
+    assert_true("X-Amz-Security-Token=fixture-token-3" in url)
+    var duration_failed = False
+    try:
+        _ = store.presign("GET", "bucket", "refresh-presign", 4000)
+    except:
+        duration_failed = True
+    assert_true(duration_failed)
+    var retry_config = S3Config.with_provider(
+        endpoint,
+        "us-east-1",
+        CredentialSource(
+            "container", endpoint + "/retry-credentials", local_fixture=True
+        ),
+    )
+    retry_config.retry_base_ms = 0
+    retry_config.credential_cache.refresh_before = 0
+    retry_config.credential_cache.snapshot = CredentialSnapshot(
+        retry_config.credentials.copy(), identity_clock() + 1
+    )
+    var retry_store = S3Store(retry_config)
+    assert_equal(
+        len(retry_store.get("bucket", "expires-between-attempts").data), 2
+    )
     var denied = CredentialCache(
         CredentialSource("container", endpoint + "/denied", local_fixture=True)
     )

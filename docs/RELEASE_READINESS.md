@@ -7,6 +7,8 @@ in [PHASE2.md](PHASE2.md), scope in RELEASE_SCOPE.md.
 | Check | Evidence and limit |
 |---|---|
 | Hosted baseline | [run 37248323851](https://github.com/insightlabs38-pixel/mojo-s3/actions/runs/37248323851) passed at `44faa2a`; ordinary/install/MinIO/ZEROS3/ASan |
+| Hosted phase-2 | [Branch runs](https://github.com/insightlabs38-pixel/mojo-s3/actions?query=branch%3Asdk%2Fs3-phase2); inspect the completed result for the exact pushed commit |
+| Adjacent compiler | Full ordinary checks and examples passed with exact nightly 1.2.0.dev2026100406; this does not establish released TSan support |
 | Ordinary phase-2 | Mojo 1.1.0: precompile, units, deterministic protocol cases, credential fixtures, copy/batch faults, download cleanup/cancellation/write faults, TLS and examples |
 | Installation | Source archive installs into an independent prefix with spaces; compiled downstream consumer passes; occupied installation refused |
 | MinIO | Copy/conditions/batch/HeadBucket, version-aware reads/copy/delete, four negotiated checksums buffered+streamed, ranged1/2/4/8 odd-tail/small/empty, controlled multipart cancellation/progress passed |

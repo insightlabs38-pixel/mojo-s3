@@ -25,7 +25,7 @@ cleanup and are unsuitable for this ordinary harness. Session credentials are
 exercised when supplied, with no token output. Web Identity/IMDS/provider refresh
 has deterministic fixture coverage, not AWS workload-account coverage.
 
-Tests include CRUD, metadata/content-type, listing/pagination, unusual/reserved/
+Tests include HeadBucket, copy and batch deletion, CRUD, metadata/content-type, listing/pagination, unusual/reserved/
 Unicode keys, closed/open/suffix ranges, presigned GET/PUT, streamed file transfers,
 sequential and concurrent multipart, TransferManager selection/concurrent download,
 and four full-object checksum algorithms. KMS/DSSE, version administration and
