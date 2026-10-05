@@ -8,6 +8,7 @@ from mojo_s3.crypto import bytes_of
 from mojo_s3.xml import parse_xml, child_text
 from mojo_s3.errors import parse_s3_error
 from mojo_s3.files import NativeFile, errno_value
+from mojo_s3.options import put_headers
 
 
 @fieldwise_init
@@ -60,9 +61,7 @@ def initiate(
     options: PutOptions = PutOptions(),
 ) raises -> String:
     var query: List[Field] = [Field("uploads", "")]
-    var headers: List[Field] = [Field("content-type", options.content_type)]
-    for m in options.metadata:
-        headers.append(Field("x-amz-meta-" + m.name.lower(), m.value))
+    var headers = put_headers(options, False)
     var response = store.request(
         "POST", bucket, key, query, headers, List[UInt8](), False
     )

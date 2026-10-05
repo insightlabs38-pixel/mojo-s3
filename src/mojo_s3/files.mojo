@@ -3,6 +3,7 @@ from std.collections import List
 from std.ffi import external_call
 from std.memory import Pointer
 from mojo_s3.crypto import hex_encode
+from mojo_s3.checksums import crc_update, crc_bytes
 
 comptime Raw = Pointer[UInt8, MutUntrackedOrigin]
 
@@ -92,13 +93,36 @@ def errno_value() -> Int:
     )
 
 
-def digest_file(file: NativeFile) raises -> List[UInt8]:
+def digest_file(
+    file: NativeFile, algorithm: String = "sha256"
+) raises -> List[UInt8]:
     file.rewind()
+    if algorithm == "crc32" or algorithm == "crc32c":
+        var crc = UInt32(0xFFFFFFFF)
+        var buffer = List[UInt8](length=65536, fill=0)
+        while True:
+            var n = external_call["read", Int64](
+                Int(file.fd), buffer.unsafe_ptr(), len(buffer)
+            )
+            if n < 0:
+                if errno_value() == 4:
+                    continue
+                raise Error("Cannot read checksum file")
+            if n == 0:
+                break
+            crc = crc_update(buffer, Int(n), crc, algorithm)
+        file.rewind()
+        return crc_bytes(crc)
+    if algorithm != "sha256" and algorithm != "sha1":
+        raise Error("Unsupported file checksum algorithm")
     var context = DigestContext()
-    var algorithm = external_call["EVP_sha256", Raw]()
+    var native_algorithm = (
+        external_call["EVP_sha256", Raw]() if algorithm
+        == "sha256" else external_call["EVP_sha1", Raw]()
+    )
     if (
         external_call["EVP_DigestInit_ex", Int32](
-            context.ptr, algorithm, Optional[Raw](None)
+            context.ptr, native_algorithm, Optional[Raw](None)
         )
         != 1
     ):
@@ -121,15 +145,11 @@ def digest_file(file: NativeFile) raises -> List[UInt8]:
             != 1
         ):
             raise Error("SHA256 update failed")
-    var digest = List[UInt8](length=32, fill=0)
+    var digest = List[UInt8](length=32 if algorithm == "sha256" else 20, fill=0)
     var length = UInt32(0)
-    if (
-        external_call["EVP_DigestFinal_ex", Int32](
-            context.ptr, digest.unsafe_ptr(), Pointer(to=length)
-        )
-        != 1
-        or length != 32
-    ):
+    if external_call["EVP_DigestFinal_ex", Int32](
+        context.ptr, digest.unsafe_ptr(), Pointer(to=length)
+    ) != 1 or Int(length) != len(digest):
         raise Error("SHA256 finalization failed")
     file.rewind()
     return digest^

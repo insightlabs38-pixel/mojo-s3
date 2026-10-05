@@ -76,3 +76,13 @@ def base64_encode(data: List[UInt8]) raises -> String:
     if n < 0:
         raise Error("OpenSSL Base64 encoding failed")
     return String(from_utf8=Span(unsafe_ptr=output.unsafe_ptr(), length=Int(n)))
+
+
+def content_md5(data: List[UInt8]) raises -> String:
+    """S3 DeleteObjects transport checksum; never interpret an ETag as MD5."""
+    var digest = List[UInt8](length=16, fill=0)
+    if not external_call["MD5", Optional[Raw]](
+        data.unsafe_ptr(), len(data), digest.unsafe_ptr()
+    ):
+        raise Error("OpenSSL request MD5 failed")
+    return base64_encode(digest)

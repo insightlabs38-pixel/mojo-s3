@@ -4,6 +4,7 @@ from std.ffi import external_call
 from std.memory import Pointer
 from std.collections import List
 from mojo_s3.signing import Credentials
+from mojo_s3.identity import CredentialCache, CredentialSource
 from mojo_s3.credentials import (
     EnvironmentCredentials,
     default_credentials,
@@ -23,6 +24,8 @@ struct S3Config(Copyable, Movable):
     var max_attempts: Int
     var retry_base_ms: Int
     var request_checksums: Bool
+    var credential_cache: CredentialCache
+    var checksum_algorithm: String
 
     def __init__(
         out self,
@@ -50,6 +53,25 @@ struct S3Config(Copyable, Movable):
         self.max_attempts = max_attempts
         self.retry_base_ms = retry_base_ms
         self.request_checksums = request_checksums
+        self.credential_cache = CredentialCache()
+        self.checksum_algorithm = "sha256"
+
+    def credential_snapshot(mut self) raises -> Credentials:
+        if self.credential_cache.source.kind:
+            return self.credential_cache.resolve()
+        return self.credentials.copy()
+
+    @staticmethod
+    def with_provider(
+        endpoint: String,
+        region: String,
+        source: CredentialSource,
+        virtual_host: Bool = False,
+    ) raises -> Self:
+        var cache = CredentialCache(source)
+        var result = Self(endpoint, region, cache.resolve(), virtual_host)
+        result.credential_cache = cache^
+        return result^
 
     @staticmethod
     def aws(
@@ -118,7 +140,9 @@ def environment_virtual_host() raises -> Bool:
     return style == "false"
 
 
-def aws_endpoint(region: String) raises -> String:
+def aws_endpoint(
+    region: String, dual_stack: Bool = False, fips: Bool = False
+) raises -> String:
     if not region:
         raise Error("AWS region is required")
     for b in region.as_bytes():
@@ -127,7 +151,16 @@ def aws_endpoint(region: String) raises -> String:
     var suffix = ".amazonaws.com.cn" if region.startswith(
         "cn-"
     ) else ".amazonaws.com"
-    return "https://s3." + region + suffix
+    if region.startswith("cn-") and fips:
+        raise Error("FIPS endpoints are not supported for the China partition")
+    return (
+        "https://"
+        + ("s3-fips" if fips else "s3")
+        + (".dualstack" if dual_stack else "")
+        + "."
+        + region
+        + suffix
+    )
 
 
 comptime Raw = Pointer[UInt8, MutUntrackedOrigin]

@@ -3,7 +3,16 @@ from mojo_s3.client import S3Store
 from mojo_s3.objects import PutOptions, PutResult, ObjectMetadata
 from mojo_s3.files import NativeFile
 from mojo_s3.multipart import multipart_upload_file
-from mojo_s3.concurrent import concurrent_multipart_upload_file
+from mojo_s3.concurrent import (
+    concurrent_multipart_upload_file,
+    controlled_multipart_upload_file,
+)
+from mojo_s3.downloads import concurrent_download_file
+from mojo_s3.transfer_control import (
+    TransferControl,
+    ProgressObserver,
+    NoProgress,
+)
 
 
 struct TransferOptions(Copyable, Movable):
@@ -48,8 +57,8 @@ struct TransferManager(Movable):
     """Own a store and select streamed PUT or bounded multipart for files.
 
     The part-buffer budget excludes request copies, response buffers, native
-    libraries and allocator overhead. Downloads retain the store's atomic
-    streamed-file behavior. A manager has one active owner, like its store.
+    libraries and allocator overhead. Large downloads use bounded ranges with
+    atomic destination replacement. A manager has one active owner, like its store.
     """
 
     var store: S3Store
@@ -91,4 +100,67 @@ struct TransferManager(Movable):
     def download_file(
         mut self, bucket: String, key: String, destination: String
     ) raises -> ObjectMetadata:
-        return self.store.download_file(bucket, key, destination)
+        self.options.validate()
+        var metadata = self.store.head(bucket, key)
+        if metadata.size < self.options.multipart_threshold:
+            return self.store.download_file(bucket, key, destination)
+        var control = TransferControl()
+        var observer = NoProgress()
+        return concurrent_download_file(
+            self.store,
+            bucket,
+            key,
+            destination,
+            self.options.workers,
+            self.options.part_size,
+            control,
+            observer,
+        )
+
+    def download_file[
+        Observer: ProgressObserver
+    ](
+        mut self,
+        bucket: String,
+        key: String,
+        destination: String,
+        mut control: TransferControl,
+        mut observer: Observer,
+    ) raises -> ObjectMetadata:
+        self.options.validate()
+        return concurrent_download_file(
+            self.store,
+            bucket,
+            key,
+            destination,
+            self.options.workers,
+            self.options.part_size,
+            control,
+            observer,
+        )
+
+    def upload_file[
+        Observer: ProgressObserver
+    ](
+        mut self,
+        bucket: String,
+        key: String,
+        source: String,
+        options: PutOptions,
+        mut control: TransferControl,
+        mut observer: Observer,
+    ) raises -> PutResult:
+        self.options.validate()
+        # Controlled uploads use multipart for nonempty files, including small
+        # files, so cancellation can abort an uncommitted upload ID.
+        return controlled_multipart_upload_file(
+            self.store,
+            bucket,
+            key,
+            source,
+            self.options.workers,
+            self.options.part_size,
+            options,
+            control,
+            observer,
+        )

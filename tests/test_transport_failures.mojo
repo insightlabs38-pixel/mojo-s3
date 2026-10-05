@@ -58,6 +58,8 @@ def main() raises:
     assert_true(failed)
     assert_equal(store.last_error.value().code, "AccessDenied")
     assert_equal(store.last_error.value().request_id, "1")
+    assert_equal(store.last_error.value().attempts, 1)
+    assert_true(not store.last_error.value().retry_exhausted)
     var tiny = S3Store(config, CurlTransport(1000, 1000, 16))
     failed = False
     try:
@@ -108,6 +110,16 @@ def main() raises:
     assert_true(failed)
     assert_equal(store.last_error.value().status, 503)
     assert_equal(store.last_error.value().request_id, "1")
+    assert_equal(store.last_error.value().attempts, 1)
+    assert_true(not store.last_error.value().retry_exhausted)
+    failed = False
+    try:
+        _ = store.get("bucket", "exhausted")
+    except:
+        failed = True
+    assert_true(failed)
+    assert_equal(store.last_error.value().attempts, 3)
+    assert_true(store.last_error.value().retry_exhausted)
     print(
         "503 recovery, reset recovery, permanent denial, buffer limits, embedded 200 error, and unsafe-operation retry suppression passed"
     )

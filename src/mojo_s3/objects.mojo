@@ -12,6 +12,8 @@ struct ObjectMetadata(Copyable, Movable):
     var checksum: String
     var checksum_algorithm: String
     var checksum_verified: Bool
+    var checksum_type: String
+    var checksum_state: String
 
     def __init__(
         out self,
@@ -23,6 +25,8 @@ struct ObjectMetadata(Copyable, Movable):
         checksum: String = "",
         checksum_algorithm: String = "",
         checksum_verified: Bool = False,
+        checksum_type: String = "",
+        checksum_state: String = "absent",
     ):
         self.size = size
         self.etag = etag
@@ -32,6 +36,8 @@ struct ObjectMetadata(Copyable, Movable):
         self.checksum = checksum
         self.checksum_algorithm = checksum_algorithm
         self.checksum_verified = checksum_verified
+        self.checksum_type = checksum_type
+        self.checksum_state = checksum_state
 
 
 @fieldwise_init
@@ -62,13 +68,143 @@ struct ListResult(Copyable, Movable):
     var next_token: String
 
 
+struct Conditions(Copyable, Movable):
+    var if_match: String
+    var if_none_match: String
+    var if_modified_since: String
+    var if_unmodified_since: String
+
+    def __init__(
+        out self,
+        if_match: String = "",
+        if_none_match: String = "",
+        if_modified_since: String = "",
+        if_unmodified_since: String = "",
+    ):
+        self.if_match = if_match
+        self.if_none_match = if_none_match
+        self.if_modified_since = if_modified_since
+        self.if_unmodified_since = if_unmodified_since
+
+    def headers(self, prefix: String = "") -> List[Field]:
+        var result = List[Field]()
+        for field in [
+            Field("if-match", self.if_match),
+            Field("if-none-match", self.if_none_match),
+            Field("if-modified-since", self.if_modified_since),
+            Field("if-unmodified-since", self.if_unmodified_since),
+        ]:
+            if field.value:
+                result.append(Field(prefix + field.name, field.value))
+        return result^
+
+
+struct ReadOptions(Copyable, Movable):
+    var version_id: String
+    var conditions: Conditions
+    var expected_bucket_owner: String
+
+    def __init__(
+        out self,
+        version_id: String = "",
+        conditions: Conditions = Conditions(),
+        expected_bucket_owner: String = "",
+    ):
+        self.version_id = version_id
+        self.conditions = conditions.copy()
+        self.expected_bucket_owner = expected_bucket_owner
+
+    def query(self) -> List[Field]:
+        var result = List[Field]()
+        if self.version_id:
+            result.append(Field("versionId", self.version_id))
+        return result^
+
+    def headers(self) -> List[Field]:
+        var result = self.conditions.headers()
+        if self.expected_bucket_owner:
+            result.append(
+                Field("x-amz-expected-bucket-owner", self.expected_bucket_owner)
+            )
+        return result^
+
+
 struct PutOptions(Copyable, Movable):
     var content_type: String
     var metadata: List[Field]
+    var content_disposition: String
+    var content_encoding: String
+    var cache_control: String
+    var content_language: String
+    var tags: List[Field]
+    var storage_class: String
+    var encryption: String
+    var kms_key_id: String
+    var expected_bucket_owner: String
+    var conditions: Conditions
 
     def __init__(out self, content_type: String = "application/octet-stream"):
         self.content_type = content_type
         self.metadata = List[Field]()
+        self.content_disposition = ""
+        self.content_encoding = ""
+        self.cache_control = ""
+        self.content_language = ""
+        self.tags = List[Field]()
+        self.storage_class = ""
+        self.encryption = ""
+        self.kms_key_id = ""
+        self.expected_bucket_owner = ""
+        self.conditions = Conditions()
+
+
+@fieldwise_init
+struct ObjectIdentifier(Copyable, Movable):
+    var key: String
+    var version_id: String
+
+
+@fieldwise_init
+struct DeleteFailure(Copyable, Movable):
+    var object: ObjectIdentifier
+    var code: String
+    var message: String
+
+
+@fieldwise_init
+struct BatchDeleteResult(Copyable, Movable):
+    var deleted: List[ObjectIdentifier]
+    var errors: List[DeleteFailure]
+
+    def all_succeeded(self) -> Bool:
+        return not len(self.errors)
+
+
+@fieldwise_init
+struct CopyResult(Copyable, Movable):
+    var etag: String
+    var last_modified: String
+    var version_id: String
+    var source_version_id: String
+
+
+struct CopyOptions(Copyable, Movable):
+    var source_version_id: String
+    var source_conditions: Conditions
+    var metadata_directive: String
+    var destination: PutOptions
+
+    def __init__(
+        out self,
+        source_version_id: String = "",
+        metadata_directive: String = "COPY",
+        destination: PutOptions = PutOptions(),
+        source_conditions: Conditions = Conditions(),
+    ):
+        self.source_version_id = source_version_id
+        self.source_conditions = source_conditions.copy()
+        self.metadata_directive = metadata_directive
+        self.destination = destination.copy()
 
 
 struct ListOptions(Copyable, Movable):

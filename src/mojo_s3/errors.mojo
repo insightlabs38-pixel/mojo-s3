@@ -4,7 +4,6 @@ from mojo_s3.protocol import get_header
 from mojo_s3.xml import parse_xml, child_text
 
 
-@fieldwise_init
 struct S3Error(Copyable, Movable):
     var status: Int
     var code: String
@@ -13,9 +12,46 @@ struct S3Error(Copyable, Movable):
     var host_id: String
     var resource: String
     var category: String
+    var bucket_region: String
+    var attempts: Int
+    var retry_exhausted: Bool
+
+    def __init__(
+        out self,
+        status: Int,
+        code: String,
+        message: String,
+        request_id: String,
+        host_id: String,
+        resource: String,
+        category: String,
+        bucket_region: String = "",
+        attempts: Int = 0,
+        retry_exhausted: Bool = False,
+    ):
+        self.status = status
+        self.code = code
+        self.message = message
+        self.request_id = request_id
+        self.host_id = host_id
+        self.resource = resource
+        self.category = category
+        self.bucket_region = bucket_region
+        self.attempts = attempts
+        self.retry_exhausted = retry_exhausted
 
 
 def error_category(status: Int, code: String) -> String:
+    if (
+        status == 301
+        or status == 307
+        or code == "AuthorizationHeaderMalformed"
+        or code == "PermanentRedirect"
+        or code == "IncorrectEndpoint"
+    ):
+        return "RegionMismatch"
+    if status == 304:
+        return "NotModified"
     if status == 404:
         return "NotFound"
     if code == "SignatureDoesNotMatch":
@@ -74,4 +110,5 @@ def parse_s3_error(response: HttpResponse) -> S3Error:
         host_id,
         resource,
         error_category(response.status, code),
+        get_header(response.headers, "x-amz-bucket-region"),
     )

@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.."
 ./scripts/format --check
 mkdir -p build
 ./scripts/mojo precompile -I src src/mojo_s3 -o build/mojo_s3.mojoc
-for test in crypto signing signing_differential xml protocol retry multipart properties threads credentials ranges_pagination transfers; do
+for test in crypto signing signing_differential xml protocol retry multipart properties threads credentials ranges_pagination transfers data_plane identity checksum_algorithms transfer_control; do
     ./scripts/build "tests/test_${test}.mojo" "build/test_${test}"
     "build/test_${test}"
 done
@@ -13,6 +13,13 @@ for test in http transport_failures tls concurrent_failures checksums; do
 done
 python3 scripts/run_fault_tests.py "$PWD/build/test_http" "$PWD/build/test_transport_failures" "$PWD/build/test_concurrent_failures" "$PWD/build/test_checksums"
 python3 scripts/run_tls_test.py "$PWD/build/test_tls"
+for test in data_plane_faults identity_network download_faults; do
+    ./scripts/build "tests/test_${test}.mojo" "build/test_${test}"
+done
+python3 scripts/run_data_plane_faults.py "$PWD/build/test_data_plane_faults"
+python3 scripts/run_identity_fixtures.py "$PWD/build/test_identity_network"
+python3 scripts/run_download_faults.py "$PWD/build/test_download_faults"
+./scripts/build tests/test_aws.mojo build/test_aws
 for example in examples/*.mojo; do
     ./scripts/build "$example" "build/$(basename "$example" .mojo)"
 done
@@ -20,6 +27,8 @@ if [[ "${RUN_S3_INTEGRATION:-0}" == 1 ]]; then
     : "${S3_TEST_BUCKET:?Set an isolated S3_TEST_BUCKET}"
     ./scripts/build tests/test_integration.mojo build/test_integration
     build/test_integration
+    ./scripts/build tests/test_data_plane_integration.mojo build/test_data_plane_integration
+    build/test_data_plane_integration
     if [[ -n "${S3_STREAM_SOURCE:-}" && -n "${S3_STREAM_DESTINATION:-}" ]]; then
         for test in streaming multipart_integration concurrent_integration transfers_integration; do
             ./scripts/build "tests/test_${test}.mojo" "build/test_${test}"

@@ -16,4 +16,24 @@ from mojo_s3.objects import (
     ListOptions,
     ListPaginator,
     ObjectRange,
+    Conditions,
+    ReadOptions,
+    CopyOptions,
+    CopyResult,
+    ObjectIdentifier,
+    BatchDeleteResult,
+    DeleteFailure,
+)
+
+from mojo_s3.identity import (
+    CredentialSnapshot,
+    CredentialSource,
+    CredentialCache,
+    workload_source_from_env,
+)
+
+from mojo_s3.transfer_control import (
+    TransferControl,
+    TransferProgress,
+    ProgressObserver,
 )

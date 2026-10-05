@@ -32,8 +32,22 @@ from mojo_s3.objects import (
     GetResult,
     PutResult,
     ListResult,
+    ReadOptions,
+    CopyOptions,
+    CopyResult,
+    ObjectIdentifier,
+    BatchDeleteResult,
 )
 from mojo_s3.xml import parse_xml, child_text
+from mojo_s3.checksums import checksum_digest, supplied_checksum, full_checksum
+from mojo_s3.options import (
+    put_headers,
+    copy_source,
+    delete_manifest,
+    parse_delete_result,
+    validate_delete_result,
+)
+from mojo_s3.crypto import bytes_of, content_md5
 
 
 def decimal(value: String) raises -> Int:
@@ -87,16 +101,27 @@ def metadata_of(response: HttpResponse) raises -> ObjectMetadata:
     for h in response.headers:
         if h.name.startswith("x-amz-meta-"):
             metadata.append(Field(String(h.name[byte=11:]), h.value))
+    var checksum = supplied_checksum(response.headers)
+    var kind = get_header(response.headers, "x-amz-checksum-type")
+    var state = (
+        "absent" if not checksum.value else "composite" if kind == "COMPOSITE"
+        or (
+            not kind and "-" in checksum.value
+        ) else "unverified" if full_checksum(
+            response.headers
+        ).value else "unsupported"
+    )
     return ObjectMetadata(
         decimal(get_header(response.headers, "content-length")),
         get_header(response.headers, "etag"),
         get_header(response.headers, "content-type"),
         get_header(response.headers, "x-amz-version-id"),
         metadata^,
-        get_header(response.headers, "x-amz-checksum-sha256"),
-        "sha256" if get_header(
-            response.headers, "x-amz-checksum-sha256"
-        ) else "",
+        checksum.value,
+        checksum.name,
+        False,
+        kind,
+        state,
     )
 
 
@@ -196,20 +221,21 @@ struct S3Store(ObjectStore):
             payload_hash_override if payload_hash_override else sha256_hex(body)
         )
         for attempt in range(self.config.max_attempts):
+            var credentials = self.config.credential_snapshot()
             var timestamp = self.timestamp()
             var headers = extra_headers.copy()
             headers.append(Field("host", a.host))
             headers.append(Field("x-amz-date", timestamp))
             headers.append(Field("x-amz-content-sha256", payload_hash))
-            if self.config.credentials.session_token:
+            if credentials.session_token:
                 headers.append(
                     Field(
                         "x-amz-security-token",
-                        self.config.credentials.session_token,
+                        credentials.session_token,
                     )
                 )
             var signature = sign(
-                self.config.credentials,
+                credentials,
                 self.config.region,
                 "s3",
                 method,
@@ -220,6 +246,7 @@ struct S3Store(ObjectStore):
                 timestamp,
             )
             headers.append(Field("authorization", signature.authorization))
+            headers.append(Field("user-agent", "mojo-s3/0.1.0-dev"))
             if download_fd >= 0:
                 if (
                     external_call["lseek", Int64](
@@ -254,6 +281,10 @@ struct S3Store(ObjectStore):
                     "",
                     "",
                     "Timeout" if code == 28 else "TransportFailure",
+                    attempts=attempt + 1,
+                    retry_exhausted=retry_safe
+                    and retryable_transport(code)
+                    and attempt + 1 == self.config.max_attempts,
                 )
                 if (
                     retry_safe
@@ -286,8 +317,14 @@ struct S3Store(ObjectStore):
                     error_body.shrink(Int(n))
                     response.body = error_body^
             var error = parse_s3_error(response)
-            self.last_error = error.copy()
             var retryable = retryable_status(response.status, error.code)
+            error.attempts = attempt + 1
+            error.retry_exhausted = (
+                retry_safe
+                and retryable
+                and attempt + 1 == self.config.max_attempts
+            )
+            self.last_error = error.copy()
             if (
                 retry_safe
                 and retryable
@@ -317,20 +354,20 @@ struct S3Store(ObjectStore):
     def check_checksum(
         mut self, response: HttpResponse, expected: String
     ) raises -> Bool:
-        var supplied = full_sha256_checksum(response)
+        var supplied = full_checksum(response.headers).value
         if not supplied:
             return False
         if supplied != expected:
             self.last_error = S3Error(
                 response.status,
                 "ChecksumMismatch",
-                "S3 full-object SHA256 mismatch",
+                "S3 full-object checksum mismatch",
                 get_header(response.headers, "x-amz-request-id"),
                 "",
                 "",
                 "DataIntegrity",
             )
-            raise Error("S3 full-object SHA256 checksum mismatch")
+            raise Error("S3 full-object checksum mismatch")
         return True
 
     def put(
@@ -340,12 +377,15 @@ struct S3Store(ObjectStore):
         data: List[UInt8],
         options: PutOptions = PutOptions(),
     ) raises -> PutResult:
-        var headers: List[Field] = [Field("content-type", options.content_type)]
-        for m in options.metadata:
-            headers.append(Field("x-amz-meta-" + m.name.lower(), m.value))
+        var headers = put_headers(options)
         if self.config.request_checksums:
             headers.append(
-                Field("x-amz-checksum-sha256", base64_encode(sha256(data)))
+                Field(
+                    "x-amz-checksum-" + self.config.checksum_algorithm,
+                    base64_encode(
+                        checksum_digest(data, self.config.checksum_algorithm)
+                    ),
+                )
             )
         var response = self.request(
             "PUT", bucket, key, List[Field](), headers, data
@@ -356,27 +396,44 @@ struct S3Store(ObjectStore):
         )
 
     def get(mut self, bucket: String, key: String) raises -> GetResult:
-        var headers = List[Field]()
+        return self.get(bucket, key, ReadOptions())
+
+    def get(
+        mut self, bucket: String, key: String, options: ReadOptions
+    ) raises -> GetResult:
+        var headers = options.headers()
         if self.config.request_checksums:
             headers.append(Field("x-amz-checksum-mode", "ENABLED"))
         var response = self.request(
-            "GET", bucket, key, List[Field](), headers, List[UInt8]()
+            "GET", bucket, key, options.query(), headers, List[UInt8]()
         )
         var metadata = metadata_of(response)
         if len(response.body) != metadata.size:
             raise Error("S3 download content-length mismatch")
-        if full_sha256_checksum(response):
+        if full_checksum(response.headers).value:
             metadata.checksum_verified = self.check_checksum(
-                response, base64_encode(sha256(response.body))
+                response,
+                base64_encode(
+                    checksum_digest(response.body, metadata.checksum_algorithm)
+                ),
             )
+            metadata.checksum_state = "verified"
         var data = response.body^
         response.body = List[UInt8]()
         return GetResult(data^, metadata^)
 
     def head(mut self, bucket: String, key: String) raises -> ObjectMetadata:
+        return self.head(bucket, key, ReadOptions())
+
+    def head(
+        mut self, bucket: String, key: String, options: ReadOptions
+    ) raises -> ObjectMetadata:
+        var headers = options.headers()
+        if self.config.request_checksums:
+            headers.append(Field("x-amz-checksum-mode", "ENABLED"))
         return metadata_of(
             self.request(
-                "HEAD", bucket, key, List[Field](), List[Field](), List[UInt8]()
+                "HEAD", bucket, key, options.query(), headers, List[UInt8]()
             )
         )
 
@@ -393,9 +450,115 @@ struct S3Store(ObjectStore):
             raise e^
 
     def delete(mut self, bucket: String, key: String) raises:
+        self.delete(bucket, key, ReadOptions())
+
+    def delete(
+        mut self, bucket: String, key: String, options: ReadOptions
+    ) raises:
+        if len(options.conditions.headers()):
+            raise Error("DELETE conditions are not supported by this API")
         _ = self.request(
-            "DELETE", bucket, key, List[Field](), List[Field](), List[UInt8]()
+            "DELETE",
+            bucket,
+            key,
+            options.query(),
+            options.headers(),
+            List[UInt8](),
         )
+
+    def head_bucket(mut self, bucket: String) raises:
+        _ = self.request(
+            "HEAD", bucket, "", List[Field](), List[Field](), List[UInt8]()
+        )
+
+    def bucket_exists(mut self, bucket: String) raises -> Bool:
+        try:
+            self.head_bucket(bucket)
+            return True
+        except e:
+            if (
+                self.last_error
+                and self.last_error.value().category == "NotFound"
+            ):
+                return False
+            raise e^
+
+    def copy_object(
+        mut self,
+        source_bucket: String,
+        source_key: String,
+        bucket: String,
+        key: String,
+        options: CopyOptions = CopyOptions(),
+    ) raises -> CopyResult:
+        if (
+            options.metadata_directive != "COPY"
+            and options.metadata_directive != "REPLACE"
+        ):
+            raise Error("Copy metadata directive must be COPY or REPLACE")
+        var headers = put_headers(options.destination, False)
+        headers.append(
+            Field(
+                "x-amz-copy-source",
+                copy_source(
+                    source_bucket, source_key, options.source_version_id
+                ),
+            )
+        )
+        headers.append(
+            Field("x-amz-metadata-directive", options.metadata_directive)
+        )
+        for field in options.source_conditions.headers("x-amz-copy-source-"):
+            headers.append(field.copy())
+        # CopyObject is limited to 5 GiB by S3; larger copies require multipart copy.
+        var response = self.request(
+            "PUT", bucket, key, List[Field](), headers, List[UInt8](), False
+        )
+        var nodes = parse_xml(
+            String(
+                from_utf8=Span(
+                    unsafe_ptr=response.body.unsafe_ptr(),
+                    length=len(response.body),
+                )
+            )
+        )
+        if nodes[0].name == "Error":
+            self.last_error = parse_s3_error(response)
+            raise Error("CopyObject returned an embedded S3 error")
+        if nodes[0].name != "CopyObjectResult" or not child_text(
+            nodes, 0, "ETag"
+        ):
+            raise Error("Malformed CopyObject result")
+        return CopyResult(
+            child_text(nodes, 0, "ETag"),
+            child_text(nodes, 0, "LastModified"),
+            get_header(response.headers, "x-amz-version-id"),
+            get_header(response.headers, "x-amz-copy-source-version-id"),
+        )
+
+    def delete_objects(
+        mut self, bucket: String, objects: List[ObjectIdentifier]
+    ) raises -> BatchDeleteResult:
+        var body = bytes_of(delete_manifest(objects))
+        var headers: List[Field] = [
+            Field("content-type", "application/xml"),
+            Field("content-md5", content_md5(body)),
+        ]
+        var query: List[Field] = [Field("delete", "")]
+        # Repeating versioned deletions can mutate delete-marker state; no retry.
+        var response = self.request(
+            "POST", bucket, "", query, headers, body, False
+        )
+        var result = parse_delete_result(
+            String(
+                from_utf8=Span(
+                    unsafe_ptr=response.body.unsafe_ptr(),
+                    length=len(response.body),
+                )
+            )
+        )
+        validate_delete_result(objects, result)
+        return result^
 
     def list(
         mut self, bucket: String, options: ListOptions = ListOptions()
@@ -458,10 +621,20 @@ struct S3Store(ObjectStore):
     def get_range(
         mut self, bucket: String, key: String, requested: ObjectRange
     ) raises -> GetResult:
+        return self.get_range(bucket, key, requested, ReadOptions())
+
+    def get_range(
+        mut self,
+        bucket: String,
+        key: String,
+        requested: ObjectRange,
+        options: ReadOptions,
+    ) raises -> GetResult:
         requested.validate()
-        var headers: List[Field] = [Field("range", requested.header())]
+        var headers = options.headers()
+        headers.append(Field("range", requested.header()))
         var response = self.request(
-            "GET", bucket, key, List[Field](), headers, List[UInt8]()
+            "GET", bucket, key, options.query(), headers, List[UInt8]()
         )
         var metadata = validate_range_response(requested, response)
         var data = response.body^
@@ -469,7 +642,7 @@ struct S3Store(ObjectStore):
         return GetResult(data^, metadata^)
 
     def presign(
-        self,
+        mut self,
         method: String,
         bucket: String,
         key: String,
@@ -484,6 +657,16 @@ struct S3Store(ObjectStore):
             raise Error(
                 "Presign supports GET/PUT and expiration 1..604800 seconds"
             )
+        var credentials = self.config.credential_snapshot()
+        if self.config.credential_cache.snapshot:
+            if (
+                expires
+                > self.config.credential_cache.snapshot.value().expiration
+                - Int(utc_seconds())
+            ):
+                raise Error(
+                    "Presign duration exceeds workload credential expiration"
+                )
         var a = address(
             self.config.endpoint, bucket, key, self.config.virtual_host
         )
@@ -507,7 +690,7 @@ struct S3Store(ObjectStore):
         ]
         # Header names are canonicalized using the same ordinary signer.
         var initial = sign(
-            self.config.credentials,
+            credentials,
             self.config.region,
             "s3",
             method,
@@ -518,15 +701,15 @@ struct S3Store(ObjectStore):
             timestamp,
         )
         query.append(Field("X-Amz-SignedHeaders", initial.signed_headers))
-        if self.config.credentials.session_token:
+        if credentials.session_token:
             query.append(
                 Field(
                     "X-Amz-Security-Token",
-                    self.config.credentials.session_token,
+                    credentials.session_token,
                 )
             )
         var result = sign(
-            self.config.credentials,
+            credentials,
             self.config.region,
             "s3",
             method,
@@ -560,10 +743,12 @@ struct S3Store(ObjectStore):
         var metadata = metadata_of(response)
         if metadata.size != self.transport.last_response_bytes:
             raise Error("Streamed download content-length mismatch")
-        if full_sha256_checksum(response):
+        if full_checksum(response.headers).value:
             metadata.checksum_verified = self.check_checksum(
-                response, base64_encode(digest_file(file))
+                response,
+                base64_encode(digest_file(file, metadata.checksum_algorithm)),
             )
+            metadata.checksum_state = "verified"
         file.commit(destination)
         return metadata^
 
@@ -578,12 +763,15 @@ struct S3Store(ObjectStore):
         var length = file.length()
         var digest = digest_file(file)
         var hash = hex_encode(digest)
-        var headers: List[Field] = [Field("content-type", options.content_type)]
-        for m in options.metadata:
-            headers.append(Field("x-amz-meta-" + m.name.lower(), m.value))
+        var headers = put_headers(options)
         if self.config.request_checksums:
             headers.append(
-                Field("x-amz-checksum-sha256", base64_encode(digest))
+                Field(
+                    "x-amz-checksum-" + self.config.checksum_algorithm,
+                    base64_encode(
+                        digest_file(file, self.config.checksum_algorithm)
+                    ),
+                )
             )
         var response = self.request(
             "PUT",

@@ -62,17 +62,30 @@ class Handler(http.server.BaseHTTPRequestHandler):
         return self.reply(204)
 
     def do_GET(self):
-        if self.path.endswith(
-            ("/checksum-good", "/checksum-bad", "/checksum-composite")
-        ):
+        if self.path.endswith("/exhausted"):
+            return self.reply(
+                503, b"<Error><Code>ServiceUnavailable</Code></Error>"
+            )
+        if "/checksum-" in self.path:
             body = b"opaque content bytes"
-            checksum = base64.b64encode(
-                hashlib.sha256(
-                    body if self.path.endswith("good") else b"wrong"
-                ).digest()
-            ).decode()
+            # CRC32C constants cross-checked with google-crc32c 1.7.1.
+            algorithm = self.path.split("checksum-", 1)[1].split("-", 1)[0]
+            if algorithm not in ["crc32", "crc32c", "sha1", "sha256"]:
+                algorithm = "sha256"
+            data = body if self.path.endswith("good") else b"wrong"
+            if algorithm == "crc32c":
+                digest = bytes.fromhex(
+                    "27d1ce61" if data == body else "cf947eef"
+                )
+            elif algorithm == "crc32":
+                import binascii
+
+                digest = binascii.crc32(data).to_bytes(4, "big")
+            else:
+                digest = hashlib.new(algorithm, data).digest()
             headers = {
-                "x-amz-checksum-sha256": checksum,
+                "x-amz-checksum-"
+                + algorithm: base64.b64encode(digest).decode(),
                 "x-amz-checksum-type": "COMPOSITE" if self.path.endswith(
                     "composite"
                 ) else "FULL_OBJECT",

@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+"""Opt-in AWS runner; never creates/deletes buckets or changes account settings."""
+import os
+from pathlib import Path
+import re
+import secrets
+import subprocess
+import tempfile
+
+root = Path(__file__).resolve().parent.parent
+env = dict(os.environ)
+bucket = env.get('S3_AWS_TEST_BUCKET', '')
+if env.get('RUN_AWS_S3_INTEGRATION') != '1' or not bucket or env.get('S3_AWS_TEST_AUTHORIZATION') != bucket:
+    raise SystemExit('Refusing AWS access: set RUN_AWS_S3_INTEGRATION=1, S3_AWS_TEST_BUCKET, and S3_AWS_TEST_AUTHORIZATION to that same existing bucket.')
+if env.get('S3_ENDPOINT') or env.get('S3_FORCE_PATH_STYLE', 'false') != 'false':
+    raise SystemExit('AWS gate requires the native regional HTTPS virtual-host endpoint; custom endpoints/path style are refused.')
+if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,61}[a-z0-9]', bucket):
+    raise SystemExit('Use a DNS-compatible bucket without dots for HTTPS virtual hosting.')
+env['S3_AWS_TEST_PREFIX'] = 'mojo-s3-qualification/' + secrets.token_hex(16) + '/'
+print('Authorized test prefix:', env['S3_AWS_TEST_PREFIX'], flush=True)
+print('Versioned buckets can retain historical versions/delete markers: use an existing dedicated unversioned test bucket; lifecycle/manual cleanup stays with the owner.', flush=True)
+with tempfile.TemporaryDirectory(prefix='mojo-s3-aws-') as tmp:
+    env['S3_STREAM_SOURCE'] = str(Path(tmp) / 'source')
+    env['S3_STREAM_DESTINATION'] = str(Path(tmp) / 'destination')
+    subprocess.run(['python3', str(root / 'scripts/generate_transfer_fixture.py'), env['S3_STREAM_SOURCE']], check=True)
+    subprocess.run([str(root / 'scripts/build'), 'tests/test_aws.mojo', 'build/test_aws'], cwd=root, check=True)
+    subprocess.run([str(root / 'build/test_aws')], cwd=root, env=env, check=True, timeout=900)

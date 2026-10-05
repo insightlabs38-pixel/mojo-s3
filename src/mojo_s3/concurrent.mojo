@@ -21,6 +21,12 @@ from mojo_s3.multipart import (
     CompletedPart,
 )
 from mojo_s3.objects import PutOptions, PutResult
+from mojo_s3.transfer_control import (
+    TransferControl,
+    ProgressObserver,
+    NoProgress,
+    join_observed,
+)
 
 comptime Raw = Pointer[UInt8, MutUntrackedOrigin]
 comptime StopFlag = Atomic[Int32]
@@ -53,6 +59,7 @@ struct MultipartWorker(Movable):
     var max_response_bytes: Int
     var verify_tls: Bool
     var ca_bundle: String
+    var control: Optional[Pointer[TransferControl, MutUntrackedOrigin]]
 
 
 def multipart_worker(raw: Raw) abi("C") -> Optional[Raw]:
@@ -69,6 +76,8 @@ def multipart_worker(raw: Raw) abi("C") -> Optional[Raw]:
         var store = S3Store(worker[].config, transport^)
         var file = NativeFile(worker[].source)
         while number <= worker[].count and worker[].stop[].load() == 0:
+            if worker[].control and worker[].control.value()[].is_cancelled():
+                break
             try:
                 var offset_in_file = (number - 1) * worker[].part_size
                 if (
@@ -105,6 +114,8 @@ def multipart_worker(raw: Raw) abi("C") -> Optional[Raw]:
                 worker[].outcomes[unsafe_offset=number - 1] = PartOutcome(
                     number, part.etag, False, None
                 )
+                if worker[].control:
+                    worker[].control.value()[].record_progress(length)
             except:
                 worker[].outcomes[unsafe_offset=number - 1] = PartOutcome(
                     number, "", True, store.last_error.copy()
@@ -220,6 +231,7 @@ def concurrent_multipart_upload_file(
                     store.transport.max_response_bytes,
                     store.transport.verify_tls,
                     store.transport.ca_bundle,
+                    None,
                 )
             )
         run_workers(workers, _fail_after)
@@ -251,4 +263,141 @@ def concurrent_multipart_upload_file(
                 + upload_id
             )
         store.last_error = original_error^
+        raise e^
+
+
+def controlled_multipart_upload_file[
+    Observer: ProgressObserver
+](
+    mut store: S3Store,
+    bucket: String,
+    key: String,
+    source: String,
+    concurrency: Int,
+    part_size: Int,
+    options: PutOptions,
+    mut control: TransferControl,
+    mut observer: Observer,
+    fail_after: Int = -1,
+) raises -> PutResult:
+    if (
+        concurrency < 1
+        or concurrency > 16
+        or part_size < 5 * 1024 * 1024
+        or part_size > 64 * 1024 * 1024
+    ):
+        raise Error("Invalid controlled multipart bounds")
+    var file = NativeFile(source)
+    var size = file.length()
+    control.start(size)
+    if control.is_cancelled():
+        store.last_error = S3Error(
+            0, "Cancelled", "Transfer cancelled", "", "", key, "Cancelled"
+        )
+        raise Error("Upload cancelled before initiation")
+    if not size:
+        observer.on_progress(control.progress())
+        if control.is_cancelled():
+            raise Error("Empty upload cancelled")
+        return store.put(bucket, key, List[UInt8](), options)
+    var count = (size - 1) // part_size + 1
+    if count > 10000:
+        raise Error("Multipart upload exceeds 10000 parts")
+    var worker_count = min(concurrency, count)
+    var upload_id = initiate(store, bucket, key, options)
+    try:
+        var outcomes = List[PartOutcome](
+            length=count, fill=PartOutcome(0, "", False, None)
+        )
+        var stopped = StopFlag(0)
+        var workers = List[MultipartWorker](capacity=worker_count)
+        for i in range(worker_count):
+            workers.append(
+                MultipartWorker(
+                    store.config.copy(),
+                    bucket,
+                    key,
+                    source,
+                    upload_id,
+                    size,
+                    part_size,
+                    i + 1,
+                    worker_count,
+                    count,
+                    outcomes.unsafe_ptr().unsafe_origin_cast[
+                        MutUntrackedOrigin
+                    ](),
+                    Pointer(to=stopped).unsafe_origin_cast[
+                        MutUntrackedOrigin
+                    ](),
+                    store.transport.timeout_ms,
+                    store.transport.connect_timeout_ms,
+                    store.transport.max_response_bytes,
+                    store.transport.verify_tls,
+                    store.transport.ca_bundle,
+                    Pointer(to=control).unsafe_origin_cast[
+                        MutUntrackedOrigin
+                    ](),
+                )
+            )
+        var ids = List[UInt](length=worker_count, fill=0)
+        var launched = 0
+        var launch_error = False
+        for i in range(worker_count):
+            if (
+                i == fail_after
+                or external_call["pthread_create", Int32](
+                    Pointer(to=ids[i]),
+                    Optional[Raw](None),
+                    multipart_worker,
+                    Pointer(to=workers[i]).unsafe_bitcast[UInt8](),
+                )
+                != 0
+            ):
+                launch_error = True
+                break
+            launched += 1
+        if launch_error:
+            stopped.store(1)
+        join_observed(ids, launched, control, observer)
+        _ = workers
+        _ = stopped
+        _ = file
+        if launch_error:
+            raise Error("Upload partial launch failed; all workers joined")
+        if control.is_cancelled():
+            store.last_error = S3Error(
+                0, "Cancelled", "Transfer cancelled", "", "", key, "Cancelled"
+            )
+            raise Error("Upload cancelled; all workers joined")
+        var parts = List[CompletedPart]()
+        for outcome in outcomes:
+            if outcome.failed:
+                store.last_error = outcome.error.copy()
+                raise Error("Controlled multipart worker failed")
+            if not outcome.number or not outcome.etag:
+                raise Error("Controlled multipart did not finish every part")
+            parts.append(CompletedPart(outcome.number, outcome.etag))
+        return complete(store, bucket, key, upload_id, parts)
+    except e:
+        if control.observer_failed():
+            store.last_error = S3Error(
+                0,
+                "ProgressCallbackFailure",
+                "Progress observer failed",
+                "",
+                "",
+                key,
+                "LocalTransfer",
+            )
+        var original = store.last_error.copy()
+        try:
+            abort(store, bucket, key, upload_id)
+        except:
+            store.last_error = original^
+            raise Error(
+                "Controlled upload cleanup failed; orphan upload ID: "
+                + upload_id
+            )
+        store.last_error = original^
         raise e^

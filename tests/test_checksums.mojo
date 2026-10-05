@@ -24,28 +24,32 @@ def main() raises:
         True,
     )
     var store = S3Store(config)
-    var good = store.get("bucket", "checksum-good")
-    assert_true(good.metadata.checksum_verified)
-    var composite = store.get("bucket", "checksum-composite")
-    assert_false(composite.metadata.checksum_verified)
-    var failed = False
-    try:
-        _ = store.get("bucket", "checksum-bad")
-    except:
-        failed = True
-    assert_true(failed)
-    assert_equal(store.last_error.value().category, "DataIntegrity")
-    var source = getenv("S3_CONCURRENT_SOURCE")
-    var original = NativeFile(source)
-    var hash = hash_file(original)
-    failed = False
-    try:
-        _ = store.download_file("bucket", "checksum-bad", source)
-    except:
-        failed = True
-    assert_true(failed)
-    var unchanged = NativeFile(source)
-    assert_equal(hash_file(unchanged), hash)
+    for algorithm in ["sha256", "sha1", "crc32", "crc32c"]:
+        var key = "checksum-" + algorithm
+        var good = store.get("bucket", key + "-good")
+        assert_true(good.metadata.checksum_verified)
+        assert_equal(good.metadata.checksum_algorithm, algorithm)
+        var composite = store.get("bucket", key + "-composite")
+        assert_false(composite.metadata.checksum_verified)
+        assert_equal(composite.metadata.checksum_state, "composite")
+        var failed = False
+        try:
+            _ = store.get("bucket", key + "-bad")
+        except:
+            failed = True
+        assert_true(failed)
+        assert_equal(store.last_error.value().category, "DataIntegrity")
+        var source = getenv("S3_CONCURRENT_SOURCE")
+        var original = NativeFile(source)
+        var hash = hash_file(original)
+        failed = False
+        try:
+            _ = store.download_file("bucket", key + "-bad", source)
+        except:
+            failed = True
+        assert_true(failed)
+        var unchanged = NativeFile(source)
+        assert_equal(hash_file(unchanged), hash)
     print(
         "SHA256 Base64, valid checksums, corruption rejection, composite non-validation, and atomic file preservation passed"
     )
