@@ -120,3 +120,5 @@ Source installation and registry evaluation: [INSTALLATION.md](docs/INSTALLATION
 Current qualification and remaining release work: [RELEASE_READINESS.md](docs/RELEASE_READINESS.md).
 
 Current large-object, lifecycle, role-provider and sanitizer evidence: [convergence checkpoint](docs/CONVERGENCE.md). New APIs remain experimental; no release has been published.
+
+Final feature freeze and current-backend release limits: [RC convergence](docs/RC_CONVERGENCE.md). Version remains `0.1.0-dev`; live AWS qualification is the next release gate.

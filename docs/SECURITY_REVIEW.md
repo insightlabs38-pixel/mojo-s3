@@ -72,3 +72,7 @@ Ordinary, ASan and isolated TSan fault oracles cover malformed lists, oversized
 part sizes, tag duplicates, copy errors/abort failures, credential refresh and
 streamed wide offsets. This does not prove race freedom or qualify untested AWS,
 ARM64/macOS, account policy, persisted resume or proprietary runtime selection.
+
+## Final convergence review
+
+Focused final source review covers the new version parser/paginator (checked Int64, owned distinct outcomes, opaque IDs, reference-matched URL decoding, XML limits, bounded page/history, cycle rejection and atomic state updates). The shared listing decoder correctly distinguishes form-encoded spaces from percent-encoded literal plus, matching botocore; this is a relevant SDK correctness fix, not a backend accommodation. Existing transport header/TLS/response bounds, copy escaping/embedded errors/orphans, credential endpoint/expiration/no logging, and transfer callback/worker joins/staging atomicity were reviewed against the preserved implementation and controls. No new file, credential, transport or threading implementation is introduced. This is a focused security/correctness review, not a formal audit; backend and OpenSSL reports are independently attributed and kept outside SDK history.

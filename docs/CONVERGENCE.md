@@ -1,4 +1,8 @@
-# Convergence checkpoint — October 5, 2026
+# Preserved convergence checkpoint — October 5, 2026
+
+This records `sdk/s3-phase2` at `1e93cb3`; final preparation updates are in
+[RC_CONVERGENCE.md](RC_CONVERGENCE.md). Backend claims below are historical for
+the tested versions; current release evidence is in COMPATIBILITY.md.
 
 Keep **0.1.0-dev** on `sdk/s3-phase2`. No main merge, tag, publication, upstream
 issue or PR is authorized or performed. Core supported platform remains Linux
@@ -59,10 +63,10 @@ single-upload supported subset. Strict pagination remains enforced.
 
 ZEROS3's UploadPartCopy returns HTTP200 with an empty body and empty copy result,
 independently captured through boto3; native multipart copy correctly fails.
-Versity accepts tags through PutObjectTagging but rejects the equivalent encoded
+Historical Versity 1.0.16 accepts tags through PutObjectTagging but rejects the equivalent encoded
 header during multipart initiation, independently reproduced through boto3.
 Their combined new contracts are not qualified as passing. Existing baseline
-contracts remain distinct; Versity's prior If-Match deviation also remains.
+contracts remain distinct; Versity 1.8.0 passes the old tagging and If-Match cases; see RC_CONVERGENCE.md for current limits.
 
 ASan and an isolated nightly TSan closure exercise the new faults and local
 version/copy paths. The unchanged strict TSan gate passes with genuinely aware
@@ -84,8 +88,8 @@ private production-selector repair. tcmalloc remains a configuration constraint.
 
 Persisted resume is deferred until source identity, crash-safe records and server
 part reconciliation have independent oracles; RESUME_DESIGN.md specifies those
-invariants. Version listing convenience is deferred; existing explicit opaque
-version operations remain available. No inferred safe resume or automatic cleanup
+invariants. This checkpoint deferred version listing; RC preparation now provides an
+experimental bounded version/delete-marker page and paginator API. No inferred safe resume or automatic cleanup
 of other uploads is introduced. A lost initiation response can leave an unknown
 upload ID, and a lost completion response can leave an ambiguous commit; neither
 is resolved by scanning/aborting unrelated uploads.

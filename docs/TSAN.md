@@ -175,3 +175,7 @@ The original wheel and supported gate remain unchanged; no suppression or warm-u
 was introduced. Exact sources, loader/compile evidence, matched matrices and
 upstream drafts live outside this SDK repository. New API sanitizer evidence is
 recorded separately from the original gate.
+
+## Final convergence review
+
+RC preparation reproduces the independent allocator flag race on fully Clang-instrumented OpenSSL 4.0.3 and current development head; it remains distinct from the original uninstrumented hash-table synchronization warning. The isolated known-good closure passes genuine race, failure/joins and download cancellation controls. A fixture-only bounded rendezvous replaces a 50 ms scheduling assumption; the strict script is byte-identical. New version paths pass isolated nightly TSan. No dependency-wide or released-Mojo sanitizer support is claimed.

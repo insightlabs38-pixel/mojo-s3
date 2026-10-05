@@ -17,6 +17,13 @@ from mojo_s3.multipart_inspection import (
     list_multipart_uploads,
 )
 from mojo_s3.multipart_copy import upload_part_copy, multipart_copy_object
+from mojo_s3.version_listing import (
+    ObjectVersion,
+    DeleteMarker,
+    VersionsPage,
+    VersionsPaginator,
+    list_object_versions,
+)
 from mojo_s3.tagging import (
     get_object_tagging,
     put_object_tagging,

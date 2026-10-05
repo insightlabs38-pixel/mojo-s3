@@ -37,6 +37,7 @@ def main() raises:
             state = state * UInt32(1664525) + UInt32(1013904223)
             value += symbols[Int(state % UInt32(len(symbols)))]
         assert_equal(decode_key(uri_encode(value)), value)
+        assert_equal(decode_key(uri_encode(value).replace("%20", "+")), value)
         assert_equal(decode_key(uri_encode(value, True)), value)
         var query: List[Field] = [
             Field(value, " "),

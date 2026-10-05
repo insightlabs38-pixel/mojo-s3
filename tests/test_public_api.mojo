@@ -28,6 +28,11 @@ from mojo_s3 import (
     CredentialSource,
     CredentialCache,
     CredentialSnapshot,
+    ObjectVersion,
+    DeleteMarker,
+    VersionsPage,
+    VersionsPaginator,
+    list_object_versions,
 )
 
 
@@ -45,6 +50,16 @@ struct ConsumerObserver(ProgressObserver):
 
 
 def main() raises:
+    var versions = VersionsPage(
+        List[ObjectVersion](),
+        List[DeleteMarker](),
+        List[String](),
+        False,
+        "",
+        "",
+    )
+    var vp = VersionsPaginator("bucket", prefix="prefix/", page_size=2)
+    assert_true(not versions.truncated and not vp.done)
     assert_equal(ObjectIdentifier("key").version_id, "")
     var copy = CopyOptions(tagging_directive="REPLACE")
     assert_equal(copy.tagging_directive, "REPLACE")

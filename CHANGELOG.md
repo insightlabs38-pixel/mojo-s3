@@ -2,6 +2,12 @@
 
 ## 0.1.0-dev — unreleased
 
+- Experimental bounded ListObjectVersions pages/paginator with separate delete
+  markers, opaque IDs, strict encoding and marker-cycle rejection.
+- Fix encoded listing spaces/literal plus to match S3 reference URL decoding.
+- Deterministic concurrent-failure fixture rendezvous; current backend
+  requalification, API freeze and release/distribution decisions documented.
+
 Initial public source-distribution preparation. This is not a qualified release
 candidate and no tag or upstream publication has been created.
 

@@ -1,4 +1,4 @@
-# Verified compatibility
+# Historical baseline compatibility
 
 Local tests on October 4–5, 2026 with synthetic local credentials. AWS credentials
 were not attached. Results apply to the versions and cases listed, not every
@@ -87,10 +87,46 @@ passed again. MinIO local STS, full-object checksums and multiprocess stress
 passed. ASan passed native threads, failure/cleanup, the updated common contract,
 manager roundtrips, 1/2/4/8-worker multipart and verified HTTPS.
 
-These current results use stable Mojo 1.1.0. The isolated TSan runtime evidence
+These historical baseline results use stable Mojo 1.1.0. The isolated TSan runtime evidence
 uses the exact nightly and unchanged baseline specified in TSAN.md. These results do not qualify additional platforms or Versity checksum behavior.
 
-The phase-2 Versity conditional test deliberately remains failing; no SDK
+The historical Versity 1.0.16 conditional test failed; current 1.8.0 rejects the wrong If-Match. No SDK
 header was dropped to accommodate it. KMS/DSSE request construction is fixture
 coverage only. Current LLVM isolated strict gate has an unsuppressed intermittent
 OpenSSL warning; see RELEASE_READINESS.md. AWS harness: AWS_QUALIFICATION.md.
+
+## Current stable requalification — October 5, 2026
+
+GitHub release identities were fetched at execution time. MinIO is
+RELEASE.2025-10-15T17-29-55Z (`9e49d5e7a648f00e26f2246f4dc28e6b07f8c84a`),
+built from the exact release-tag source with Go 1.27.0 after its binary archive
+returned HTTP 410. Versity is checksum-verified 1.8.0 Linux x86-64, build
+`fd04bc1df2656298577b82667a4195c77f8c7563`. Latest does not mean floating CI.
+
+| Focused feature | Current MinIO | Current Versity 1.8.0 |
+|---|---|---|
+| Multipart tags: ordinary, spaces, +, /, _, - | boto3 and native pass | boto3 and native pass; old 1.0.16 failure is historical |
+| Multipart Unicode tag | InvalidTag in both clients | Both pass |
+| Duplicate tags / invalid encoding | Reference rejection tested | Reference rejection passes; typed native tags reject duplicates and construct encoding internally |
+| COPY / REPLACE / empty replacement | Native/reference pass | Native/reference pass |
+| Wrong GET/source If-Match | Native/reference reject | Native/reference reject; old acceptance is historical |
+| Multipart server copy/content | Native/reference pass | Native/reference pass |
+| ListParts pages / immediate abort and completion absence | Reference/native supported subset pass | Reference/native pass |
+| Multipart prefix / MaxUploads / ordering / markers | Still deviates: empty prefixed result, ignored bounds/markers and creation-order output | Prefix/bounds/key-only pass; paired upload marker returns InvalidArgument |
+| Versioned tag isolation / explicit-version copy | Native/reference pass | Native/reference pass with POSIX versioning-dir configured |
+| Version/delete-marker listing and pagination | Native/reference reserved, space, plus and Unicode keys pass after SDK decoding fix | First bounded page passes; continuation repeats the requested version and native strict parser rejects |
+
+The current MinIO full ordinary native transfer/range/copy/tag/version suite is
+qualified separately from the old hosted CI pin. The old pin is retained because
+the newest stable still fails the full strict multipart-listing contract. No SDK
+validation is relaxed. The SDK's shared encoded-listing decoder now matches botocore's unquote_plus:
+a bare '+' is a space and '%2B' is a literal plus. Raw unencoded keys and opaque
+version IDs are unaffected. This was an SDK bug, not a MinIO encoding deviation.
+Current Versity multipart-marker and version-continuation deviations have minimal
+boto3/raw-response reproductions, separate from its passing baseline and tag APIs.
+The preserved old MinIO matrix remains historical evidence.
+
+ZEROS3's UploadPartCopy HTTP 200 empty semantic result remains a separately
+unsupported extension. boto3 returns an empty CopyPartResult; native parsing fails.
+Common CRUD/streaming/concurrency support is unaffected. No external fix is made.
+No live AWS/account policy behavior is inferred from these local fixtures.

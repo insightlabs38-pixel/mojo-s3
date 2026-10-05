@@ -128,3 +128,22 @@ constructor. Existing explicit-version construction remains valid. Transfer
 controls/managers and all refreshing credential caches retain their experimental
 status. Consumer-visible native handles, callback addresses, worker structs,
 cache internals and underscore fields are not extension contracts.
+
+## Experimental version listing and final freeze
+
+`list_object_versions(store, bucket, prefix="", delimiter="", key_marker="",
+version_id_marker="", max_keys=1000)` returns owned `VersionsPage` lists:
+`versions`, `delete_markers`, `prefixes`, plus `truncated`, `next_key_marker` and
+`next_version_id_marker`. `ObjectVersion.size_bytes` is Int64. Version IDs remain
+opaque; delete markers have no object size/ETag.
+
+`VersionsPaginator(bucket, prefix="", delimiter="", page_size=1000,
+max_pages=10000, key_marker="", version_id_marker="")` advances one bounded
+page through `next_page(store)` until `done`; max_pages must be 1–1,000,000.
+A version marker requires a key marker. Failed validation/cycles do not advance
+state; callers may restart explicitly from preserved service markers. There is
+no automatic deletion or bucket administration. Current backend limits and
+reference-matched encoded-key decoding are in COMPATIBILITY.md.
+
+The final source-surface review is [API_FREEZE.md](API_FREEZE.md). New version
+listing and the convergence APIs remain experimental for 0.1.

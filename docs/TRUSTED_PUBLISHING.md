@@ -1,46 +1,66 @@
-# Source distribution and future publishing
+# Current distribution route — October 5, 2026
 
-The qualified distribution route is a commit-pinned source archive and installed
-source-prefix helper. No official Mojo registry schema is invented. MojoShelf's
-current [specification](https://github.com/mojoshelf/mojoshelf/blob/main/specs/03_database_cli.md)
-uses author publish tokens, not a documented OIDC trusted-publisher exchange.
-Its Pixi/git source modes still require native curl/OpenSSL/XML linker integration
-qualification. A registry publication is therefore deferred.
+The qualified first route for Mojo-S3 is a **deterministic GitHub source release**
+plus the existing installed-source-prefix build helper. This pass only builds and
+installs source artifacts; no publication, release, tag or account setting changes.
 
-`scripts/package` sorts entries, normalizes ownership/modes/timestamps, uses
-SOURCE_DATE_EPOCH (default commit time), and gzip mtime=0. It creates a versioned
-source archive, internal SHA256SUMS, BUILDINFO.json with source revision/content
-hash/compiler/platform, and an outer checksum. These are build provenance facts,
-not signed attestations. Compiled packages, toolchains and native libraries are
-excluded. `scripts/check-release` installs from that archive outside the checkout
-and runs an independent consumer, including a prefix containing spaces.
+Current official [Mojo packaging guidance](https://mojolang.org/docs/tools/packaging/)
+now describes rattler-build conda recipes, compiler-pinned `.mojoc` packages,
+prefix.dev/anaconda.org/other conda-compatible indexes and the
+[Modular community channel](https://github.com/modular/modular-community).
+That is a real supported distribution mechanism, not an invented Mojo registry.
+Community inclusion requires a reviewed recipe in the external community repo;
+its maintained build/upload workflow handles channel publishing. No external
+recipe/PR is created here. Mojo-S3's curl/OpenSSL/XML linker discovery, ABI/compiler
+pin and independent installation must be qualified inside that conda route before
+claiming registry-ready support. The current doc template uses older compiler
+numbers; it is not a verified recipe for this SDK's Mojo 1.1.0 baseline.
 
-`.github/workflows/release.yml` is manual **dry-run only** and first invokes the
-shared native CI gates: format, ordinary tests, examples, independent installation,
-MinIO, ZEROS3 and ASan. Then `scripts/release-dry-run` requires clean source,
-checks version consistency/installation, builds twice and compares byte-for-byte,
-and extracts release notes from CHANGELOG. The workflow uploads a temporary Actions
-artifact, with contents:read; it cannot create tags/releases or publish packages.
-AWS remains a separate explicitly authorized gate. Experimental TSan is documented
-separately and is not released-Mojo support. No publishing secrets or OIDC write
-permissions are requested for this unsigned source dry run.
+[mojo precompile](https://mojolang.org/docs/cli/precompile/) produces a compiler-
+version-bound artifact and explicitly says it is not a general distributable
+format. The conda recipe pins the compiler around it; this SDK's source archive
+avoids exporting an unqualified binary ABI. Community packaging is optional
+future work, not a reason to broaden this release pass.
 
-## Owner steps after this run
+## Publishing authentication and provenance
 
-1. Review phase-2 source and hosted CI, perform the authorized AWS qualification,
-   and resolve release-critical gaps. Version remains 0.1.0-dev until then.
-2. Select the reviewed commit, update VERSION/package.json/CHANGELOG together,
-   and run the manual source-release-dry-run workflow on that branch.
-3. Download and verify the source archive's outer/internal checksums and BUILDINFO;
-   review generated notes and independent-install results.
-4. For GitHub source releases, configure protected environments/required reviewers
-   and tag permissions yourself, then approve a future separately reviewed
-   publishing workflow. GitHub artifact attestations support OIDC if later added
-   with id-token:write/attestations:write; this run has not configured or issued them.
-5. For MojoShelf, first qualify its actual native-link integration and confirm its
-   current account/token process. Register the tin/account yourself and store any
-   required author token in an appropriate protected secret. Do not call this
-   trusted publishing until the registry documents and accepts an OIDC exchange.
+[Current rattler-build authentication/upload source docs](https://github.com/prefix-dev/rattler-build/blob/main/docs/authentication_and_upload.md)
+explicitly support **prefix.dev trusted publishing through GitHub Actions OIDC**.
+The owner must create/select the channel and register the exact repository and
+workflow under its Trusted Publishers settings; the workflow needs id-token:write.
+No API token is required for that configured route. This is registry upload
+authentication, distinct from optional Sigstore/GitHub provenance attestations.
+The public rendered publishing page and CLI options also describe token/auth-store
+fallbacks; their omissions do not mean OIDC is unsupported. The community upload
+workflow currently has id-token:write and uses rattler-build upload prefix.
 
-No package, release, tag, publishing token or external trusted-publisher account
-configuration was created by this phase.
+This SDK has not configured a channel/publisher, built a qualified conda recipe
+or tested that exchange. No account settings, secrets, OIDC permissions or registry
+workflow are added. GitHub source releases use repository publication permissions;
+optional artifact attestations use OIDC separately. The qualified first source
+route does not require registry trusted publishing. MojoShelf is a separate
+community option, not the current official packaging route or an activated target.
+
+## Existing source dry run
+
+scripts/package normalizes ordering, ownership/modes/timestamps and gzip mtime;
+it emits inner SHA256SUMS, revision/compiler/platform BUILDINFO and outer checksum.
+These are provenance facts, not signed attestations. No compiled toolchain/runtime
+is included. scripts/check-release installs outside the checkout (including a
+prefix with spaces) and compiles the public root-facade consumer. The manual
+release workflow is dry-run only, invokes native CI and has contents:read.
+No publishing step, registry token or id-token permission is introduced.
+
+## Small future owner checklist
+
+1. Complete explicitly authorized live AWS qualification; review the exact head,
+   API freeze, hosted CI and deterministic source/installation evidence.
+2. Choose the version/tag and GitHub source-release route, review the prepared
+   notes/checksums, and authorize publication as a separate action. Configure
+   repository/tag/environment protections according to the owner's policy.
+3. Only if conda distribution is desired later: qualify a commit/compiler-pinned
+   recipe and native linking, select a user-owned channel or seek community
+   inclusion, and configure the selected prefix.dev channel's exact repository/workflow
+   Trusted Publisher if using its documented OIDC route. A token fallback requires
+   protected account credentials; no token is needed for an accepted OIDC publisher. No account changes are required
+   merely to review the current source artifact.

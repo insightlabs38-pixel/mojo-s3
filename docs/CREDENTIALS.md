@@ -132,3 +132,7 @@ and cache has one active owner; parallel workers get independent owned copies.
 Structured STS HTTP errors use category CredentialRefresh and retain status/code/
 request ID. Credential refresh failure prevents signing the S3 request. Never log
 Authorization, tokens, secret keys or persisted provider state.
+
+## Final convergence review
+
+Final API freeze retains one-hop AssumeRole/workload refresh as experimental. No credential code changes in RC preparation; current source review and endpoint/expiration limits are summarized in API_FREEZE.md and RC_CONVERGENCE.md. Live AWS identity/account-policy qualification remains unavailable.

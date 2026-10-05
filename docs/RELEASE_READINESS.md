@@ -1,63 +1,39 @@
-# Release-readiness checkpoint — October 4, 2026
+# Release decision — October 5, 2026
 
-**0.1.0-dev remains development software.** Phase-2 adds useful native S3 data-plane
-APIs and experimental workload credentials/transfers; semantics and stability are
-in [PHASE2.md](PHASE2.md), scope in RELEASE_SCOPE.md.
+Remain **0.1.0-dev**. Feature scope is frozen for this preparation pass; no tag,
+publication or main merge is authorized. [RC_CONVERGENCE.md](RC_CONVERGENCE.md)
+and the supplemental final report identify actual executed evidence and exact CI.
+The classification below separates SDK release blockers from optional-backend
+limitations and experimental production sanitizer support.
 
-| Check | Evidence and limit |
-|---|---|
-| Hosted baseline | [run 37248323851](https://github.com/insightlabs38-pixel/mojo-s3/actions/runs/37248323851) passed at `44faa2a`; ordinary/install/MinIO/ZEROS3/ASan |
-| Hosted phase-2 | [Branch runs](https://github.com/insightlabs38-pixel/mojo-s3/actions?query=branch%3Asdk%2Fs3-phase2); inspect the completed result for the exact pushed commit |
-| Adjacent compiler | Full ordinary checks and examples passed with exact nightly 1.2.0.dev2026100406; this does not establish released TSan support |
-| Ordinary phase-2 | Mojo 1.1.0: precompile, units, deterministic protocol cases, credential fixtures, copy/batch faults, download cleanup/cancellation/write faults, TLS and examples |
-| Installation | Source archive installs into an independent prefix with spaces; compiled downstream consumer passes; occupied installation refused |
-| MinIO | Copy/conditions/batch/HeadBucket, version-aware reads/copy/delete, four negotiated checksums buffered+streamed, ranged1/2/4/8 odd-tail/small/empty, controlled multipart cancellation/progress passed |
-| ZEROS3 | Common/file/multipart/manager and new copy/conditions/batch/ranged/control contracts passed |
-| Versity | Common/file/multipart/manager/ranged/control passed; wrong If-Match accepted, so new conditional contract FAILED; copy/batch sequence not qualified by that halted test |
-| ASan | Download faults/ranges1/2/4/8/controlled multipart/manager tested separately in the local phase-2 qualification |
-| Isolated nightly TSan | Original candidate closure passed real race prerequisite/unchanged strict/live/STS/TLS/stress; later strict run reports an intermittent OpenSSL-internal cold-start warning; individual new paths are separate evidence |
-| AWS | Compiled opt-in harness/refusal checks only; no credentials/live execution |
-| Performance | Three local wall-time/RSS samples per streamed/ranged1/2/4/8, multipart1/2/4/8 and checksum operation; loopback/cache/compiler-load limits in BENCHMARKS.md |
-| Platforms | Linux x86-64 only; no ARM64/macOS execution or compiled ABI promise |
+| Item | Classification | Current evidence / closure required |
+|---|---|---|
+| Live AWS against authorized existing bucket/prefix | **Blocker (final release)** | No credentials attached; opt-in harness compiles/refuses unauthorized use. Owner must explicitly authorize and provide the existing resources, run it and retain cleanup evidence. Local backends are not AWS proof. |
+| Exact-head hosted CI and ordinary/ASan gates | **Blocker if not green** | Final handoff must record completed CI for the pushed head, ordinary gate and new ASan fixtures. A prior green head is insufficient. |
+| Deterministic source artifact / clean installation | **Blocker if not green** | Byte-identical double build, inner checksums/BUILDINFO and external public consumer/install required at final head. |
+| API review / docs / SDK corruption | **Blocker if unresolved** | API_FREEZE.md keeps implementation-shaped surfaces experimental. No known SDK corruption identified in focused review; the listing space/plus identity bug is fixed and malformed version-marker cycles fail closed. Not a formal audit. |
+| Current MinIO and Versity classification | **Non-blocker after classification** | Exact stable versions independently tested; optional listing limitations explicitly documented. CI retains old immutable MinIO pin because latest fails the full extension contract; current local suite is separate evidence. |
+| ZEROS3 UploadPartCopy | **Non-blocker for AWS-target SDK; extension unsupported on this backend** | HTTP 200 without CopyPartResult fails; no backend change or parser relaxation. Baseline support remains distinct. |
+| OpenSSL allocator flag race | **Non-blocker for ordinary SDK; dependency limitation for sanitizer claims** | Reproduced independently on current stable/development builds. Original hash warning is a separate instrumentation boundary. Local issue-quality report, no suppression/submission. |
+| Distribution activation | **Recommended before RC; blocker for publication** | Deterministic source route is qualified; user must choose/authorize release settings and publication. No registry/account setup performed. |
+| Versioned AWS / KMS / cross-account controls | **Recommended before corresponding support claims** | Local versioned fixtures and request construction do not qualify AWS account policy. Separate explicit resource authorization needed. |
+| Released Mojo TSan / Modular production selector | **Deferred after RC** | Experimental matching-nightly closure only. Private maintainer hook remains; no production sanitizer support claim. |
+| CRC64NVME / multipart checksum negotiation / persisted resume | **Deferred after RC** | Design/invariants preserved; no fake composite verification or inferred safe resume. |
+| ARM64/macOS / compiled ABI / additional backends | **Deferred after RC** | Linux x86-64, source distribution and current tested subsets only. |
 
-Runtime logs/patches live outside this SDK repository in dedicated contribution
-bundles. Original snapshots remain immutable; passing historical runs do not erase
-the later OpenSSL warning. Strict check-tsan is byte-identical to baseline.
+When exact-head CI, ordinary/ASan, deterministic installation, current backend
+classification and API/doc gates are green, the highest-value next action is an
+**explicitly authorized live AWS qualification pass**, not another feature phase.
+The project can be technically RC-quality within its documented experimental
+scope while remaining development-version software pending AWS evidence and
+owner distribution activation. No automatic version bump is justified.
 
-## Source distribution
+Owner checklist:
 
-Deterministic source archives include normalized entries, SHA256SUMS, BUILDINFO
-with revision/content hash/compiler/platform and outer checksum. Release dry run
-builds twice byte-for-byte, derives notes from CHANGELOG, and installs the artifact
-into an independent consumer. Manual Actions workflow reuses native CI before
-artifact upload; contents:read only. No publishing step, secret, release/tag or
-account-side configuration. [Owner setup](TRUSTED_PUBLISHING.md).
-
-## Remaining before 0.1.0
-
-Review the public API and phase-2 hosted CI; execute explicitly authorized live AWS
-against an existing dedicated unversioned bucket; qualify the actual distribution
-route; decide supported platform/compiler claims from execution. Refresh/cancellation/
-ranged downloads remain experimental, multipart composite checksums/resume and
-AssumeRole remain deferred. Investigate the unsuppressed OpenSSL TSan warning and
-obtain a supported released Modular runtime closure before claiming TSan support.
-Versity conditional behavior remains a documented backend limitation. No current
-critical data-corruption defect has been identified by these scoped tests; this
-is not an exhaustive security/race audit.
-
-
-## October 5 convergence decision
-
-Keep 0.1.0-dev: new API layouts and provider contracts remain experimental, the
-large-object service boundary and optional AWS account features have no live AWS
-qualification, and backend multipart-copy/tag deviations remain documented.
-Supported released-Mojo TSan is not an RC gate; the decision instead follows API
-maturity and the missing integration evidence. Do not create a tag or publication
-from this checkpoint. See [CONVERGENCE.md](CONVERGENCE.md) for current evidence.
-
-Owner steps: review experimental interfaces and native dependency assumptions;
-provide an explicitly authorized existing AWS test bucket/prefix policy; execute
-the compiled opt-in harness and retain cleanup records; authorize any separately
-preconfigured versioned/KMS resource gate; review exact-head CI and deterministic
-source dry run; then choose a version/tag/publication in a future explicit step.
-Trusted publishing remains documentation/manual source-artifact dry-run only.
+1. Supply an explicitly authorized existing AWS bucket/prefix and cleanup policy;
+   approve additional preconfigured versioned/KMS resources only if those claims
+   are to be qualified. Never change account settings implicitly.
+2. Review exact-head CI, API freeze, current backend limits and deterministic
+   source artifact/consumer results.
+3. Choose the future version/tag and source distribution route; authorize that
+   separate publication only after the qualification record is complete.

@@ -149,3 +149,7 @@ observed before rename/completion aborts or removes staging; a committed success
 is returned as success. Cancellation cannot promise rollback of a completed S3
 object. Cancellation does not interrupt an in-flight libcurl request; configured
 timeouts bound that wait.
+
+## Final convergence review
+
+RC preparation changes no planner, stream body, offset or file hashing path. The preserved 5 GiB + 7-byte wire control therefore remains the large-object evidence; it was not rerun. Current backend copy/tag/range and version-listing limitations are in COMPATIBILITY.md. Resume and multipart checksum negotiation/composition remain deferred; CRC64NVME_DESIGN.md records the bounded design assessment.

@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.."
 ./scripts/format --check
 mkdir -p build
 ./scripts/mojo precompile -I src src/mojo_s3 -o build/mojo_s3.mojoc
-for test in crypto signing signing_differential xml protocol retry multipart properties threads credentials ranges_pagination transfers data_plane identity checksum_algorithms transfer_control multipart_plan download_plan public_api; do
+for test in crypto signing signing_differential xml protocol retry multipart properties threads credentials ranges_pagination transfers data_plane identity checksum_algorithms transfer_control multipart_plan download_plan version_listing public_api; do
     ./scripts/build "tests/test_${test}.mojo" "build/test_${test}"
     "build/test_${test}"
 done
@@ -21,6 +21,8 @@ python3 scripts/run_identity_fixtures.py "$PWD/build/test_identity_network"
 python3 scripts/run_download_faults.py "$PWD/build/test_download_faults"
 ./scripts/build tests/test_multipart_api_faults.mojo build/test_multipart_api_faults
 python3 scripts/run_multipart_api_faults.py "$PWD/build/test_multipart_api_faults"
+./scripts/build tests/test_version_listing_faults.mojo build/test_version_listing_faults
+python3 scripts/run_version_listing_faults.py "$PWD/build/test_version_listing_faults"
 ./scripts/build tests/test_assume_role.mojo build/test_assume_role
 python3 scripts/run_assume_role_fixtures.py "$PWD/build/test_assume_role"
 ./scripts/build tests/test_large_stream.mojo build/test_large_stream

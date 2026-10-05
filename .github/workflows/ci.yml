@@ -53,7 +53,7 @@ jobs:
           S3_STREAM_SOURCE: /tmp/mojo-source.bin
           S3_STREAM_DESTINATION: /tmp/mojo-destination.bin
         run: |
-          for test in integration streaming multipart_integration concurrent_integration transfers_integration checksums_integration interop data_plane_integration downloads_integration controlled_upload multipart_extra_integration tag_versions_integration; do
+          for test in integration streaming multipart_integration concurrent_integration transfers_integration checksums_integration interop data_plane_integration downloads_integration controlled_upload multipart_extra_integration tag_versions_integration version_listing_integration; do
             scripts/build "tests/test_${test}.mojo" "build/test_${test}"
           done
           build/test_integration
@@ -67,6 +67,7 @@ jobs:
           build/test_controlled_upload
           build/test_multipart_extra_integration
           build/test_tag_versions_integration
+          build/test_version_listing_integration
           python scripts/session_credentials.py "$PWD/build/test_integration" "$PWD/build/test_concurrent_integration"
           python scripts/interop.py "$PWD/build/test_interop"
           python scripts/stress.py "$PWD/build/test_integration"
@@ -124,7 +125,7 @@ jobs:
           scripts/build tests/test_controlled_upload.mojo build/test_controlled_upload_asan --sanitize address
           S3_ENDPOINT=http://127.0.0.1:19001 S3_REGION=us-east-1 S3_ACCESS_KEY=mojo-ci-access S3_SECRET_KEY=mojo-ci-secret S3_TEST_BUCKET=mojo-ci-test S3_STREAM_SOURCE=/tmp/mojo-source.bin build/test_controlled_upload_asan
 
-          for pair in multipart_api_faults:run_multipart_api_faults.py assume_role:run_assume_role_fixtures.py large_stream:run_large_stream.py late_cancel:run_late_cancel.py; do
+          for pair in version_listing_faults:run_version_listing_faults.py multipart_api_faults:run_multipart_api_faults.py assume_role:run_assume_role_fixtures.py large_stream:run_large_stream.py late_cancel:run_late_cancel.py; do
             test="${pair%%:*}"
             runner="${pair#*:}"
             scripts/build "tests/test_${test}.mojo" "build/test_${test}_asan" --sanitize address

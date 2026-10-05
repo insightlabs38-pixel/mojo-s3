@@ -16,7 +16,8 @@ from mojo_s3.crypto import bytes_of
 
 def main() raises:
     assert_equal(normalize_space("  é\t雪  "), "é 雪")
-    assert_equal(decode_key("a%2Fb%25+c%C3%A9"), "a/b%+cé")
+    assert_equal(decode_key("a%2Fb%25+c%C3%A9"), "a/b% cé")
+    assert_equal(decode_key("a+b%2Bc%252B"), "a b+c%2B")
     assert_equal(uri_encode("/./../a//", True), "/./../a//")
     assert_equal(ObjectRange(0).header(), "bytes=0-")
     assert_equal(ObjectRange(0, 0).header(), "bytes=0-0")

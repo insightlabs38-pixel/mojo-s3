@@ -88,6 +88,11 @@ def decode_key(value: String) raises -> String:
                 + unhex(value.as_bytes()[i + 2])
             )
             i += 3
+        elif b == 43:
+            # S3 encoded listing fields use form URL decoding, as botocore's
+            # unquote_plus does. A literal '+' is represented by '%2B'.
+            bytes.append(32)
+            i += 1
         else:
             bytes.append(b)
             i += 1

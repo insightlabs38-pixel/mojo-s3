@@ -10,6 +10,7 @@ from urllib.parse import urlsplit, parse_qs
 counts = {}
 lock = threading.Lock()
 multipart = {}
+multipart_overlap = {}
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
@@ -40,7 +41,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
             state = multipart[path]
             state["active"] += 1
             state["peak"] = max(state["peak"], state["active"])
-        time.sleep(0.05)
+            overlap = multipart_overlap[path]
+            if state["active"] >= 2:
+                overlap.set()
+        # Prove overlap instead of relying on scheduling within a 50 ms sleep.
+        # The deliberately partial launch has just one worker and skips this.
+        if not path.endswith("concurrent-launch"):
+            assert overlap.wait(
+                timeout=10
+            ), "Two part requests did not rendezvous"
         with lock:
             state["active"] -= 1
         if (
@@ -153,6 +162,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         "abort": 0,
                         "active_at_abort": -1,
                     }
+                    multipart_overlap[path] = threading.Event()
                 return self.reply(
                     200,
                     b"<InitiateMultipartUploadResult><UploadId>fixture</UploadId></InitiateMultipartUploadResult>",
