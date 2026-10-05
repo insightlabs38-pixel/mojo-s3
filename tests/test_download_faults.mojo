@@ -1,5 +1,4 @@
 from std.os import getenv
-from std.memory import Pointer
 from std.testing import assert_equal, assert_true
 from mojo_s3 import S3Store, S3Config
 from mojo_s3.files import NativeFile, hash_file
@@ -13,19 +12,24 @@ from mojo_s3.transfer_control import (
 
 
 struct CancelObserver(ProgressObserver):
-    var control: Pointer[TransferControl, MutUntrackedOrigin]
+    var requested: Bool
     var fail: Bool
+    var at_end: Bool
 
-    def __init__(out self, mut control: TransferControl, fail: Bool):
-        self.control = Pointer(to=control).unsafe_origin_cast[
-            MutUntrackedOrigin
-        ]()
+    def __init__(out self, fail: Bool, at_end: Bool = False):
+        self.requested = False
         self.fail = fail
+        self.at_end = at_end
 
     def on_progress(mut self, progress: TransferProgress) raises:
         if self.fail:
             raise Error("Intentional observer failure")
-        self.control[].cancel()
+        self.requested = (
+            not self.at_end or progress.completed_bytes == progress.total_bytes
+        )
+
+    def cancel_requested(self) -> Bool:
+        return self.requested
 
 
 def main() raises:
@@ -46,9 +50,9 @@ def main() raises:
         assert_true(failed)
         var preserved = NativeFile(destination)
         assert_equal(hash_file(preserved), expected)
-    for mode in range(4):
+    for mode in range(5):
         var control = TransferControl()
-        var observer = CancelObserver(control, mode == 1)
+        var observer = CancelObserver(mode == 1, mode == 4)
         var failed = False
         if mode == 2:
             control.cancel()

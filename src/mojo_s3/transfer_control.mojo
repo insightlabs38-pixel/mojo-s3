@@ -18,6 +18,9 @@ trait ProgressObserver(Movable):
     def on_progress(mut self, progress: TransferProgress) raises:
         ...
 
+    def cancel_requested(self) -> Bool:
+        return False
+
 
 struct NoProgress(ProgressObserver):
     def __init__(out self):
@@ -43,44 +46,44 @@ struct TransferState(Movable):
 
 
 struct TransferControl(Movable):
-    var state: List[TransferState]
+    var _state: List[TransferState]
 
     def __init__(out self):
-        self.state = List[TransferState]()
-        self.state.append(TransferState())
+        self._state = List[TransferState]()
+        self._state.append(TransferState())
 
     def cancel(mut self):
-        self.state[0].cancelled.store(1)
+        self._state[0].cancelled.store(1)
 
     def is_cancelled(self) -> Bool:
-        return self.state[0].cancelled.load() != 0
+        return self._state[0].cancelled.load() != 0
 
     def progress(self) -> TransferProgress:
         return TransferProgress(
-            Int(self.state[0].completed_bytes.load()),
-            Int(self.state[0].total_bytes.load()),
-            Int(self.state[0].completed_parts.load()),
+            Int(self._state[0].completed_bytes.load()),
+            Int(self._state[0].total_bytes.load()),
+            Int(self._state[0].completed_parts.load()),
             self.is_cancelled(),
         )
 
     def record_progress(mut self, bytes: Int):
-        _ = self.state[0].completed_bytes.fetch_add(Int64(bytes))
-        _ = self.state[0].completed_parts.fetch_add(1)
+        _ = self._state[0].completed_bytes.fetch_add(Int64(bytes))
+        _ = self._state[0].completed_parts.fetch_add(1)
 
     def mark_observer_failed(mut self):
-        self.state[0].observer_failed.store(1)
+        self._state[0].observer_failed.store(1)
         self.cancel()
 
     def observer_failed(self) -> Bool:
-        return self.state[0].observer_failed.load() != 0
+        return self._state[0].observer_failed.load() != 0
 
     def start(mut self, total: Int) raises:
         if total < 0:
             raise Error("Invalid transfer total")
-        self.state[0].completed_bytes.store(0)
-        self.state[0].completed_parts.store(0)
-        self.state[0].total_bytes.store(Int64(total))
-        self.state[0].observer_failed.store(0)
+        self._state[0].completed_bytes.store(0)
+        self._state[0].completed_parts.store(0)
+        self._state[0].total_bytes.store(Int64(total))
+        self._state[0].observer_failed.store(0)
 
 
 def join_observed[
@@ -108,6 +111,8 @@ def join_observed[
         if not control.observer_failed():
             try:
                 observer.on_progress(control.progress())
+                if observer.cancel_requested():
+                    control.cancel()
             except:
                 control.mark_observer_failed()
         if remaining:

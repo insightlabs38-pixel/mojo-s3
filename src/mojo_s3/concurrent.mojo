@@ -15,14 +15,16 @@ from mojo_s3.http import CurlTransport
 from mojo_s3.files import NativeFile, errno_value
 from mojo_s3.multipart import (
     initiate,
-    upload_part,
+    upload_part_file,
     complete,
     abort,
     CompletedPart,
 )
 from mojo_s3.objects import PutOptions, PutResult
+from mojo_s3.multipart_plan import plan_multipart, MAX_PART_BYTES
 from mojo_s3.transfer_control import (
     TransferControl,
+    TransferState,
     ProgressObserver,
     NoProgress,
     join_observed,
@@ -59,7 +61,7 @@ struct MultipartWorker(Movable):
     var max_response_bytes: Int
     var verify_tls: Bool
     var ca_bundle: String
-    var control: Optional[Pointer[TransferControl, MutUntrackedOrigin]]
+    var control: Optional[Pointer[TransferState, MutUntrackedOrigin]]
 
 
 def multipart_worker(raw: Raw) abi("C") -> Optional[Raw]:
@@ -76,46 +78,36 @@ def multipart_worker(raw: Raw) abi("C") -> Optional[Raw]:
         var store = S3Store(worker[].config, transport^)
         var file = NativeFile(worker[].source)
         while number <= worker[].count and worker[].stop[].load() == 0:
-            if worker[].control and worker[].control.value()[].is_cancelled():
+            if (
+                worker[].control
+                and worker[].control.value()[].cancelled.load() != 0
+            ):
                 break
             try:
                 var offset_in_file = (number - 1) * worker[].part_size
-                if (
-                    external_call["lseek", Int64](
-                        file.fd, Int64(offset_in_file), Int32(0)
-                    )
-                    < 0
-                ):
-                    raise Error("Cannot seek multipart source")
                 var length = min(
                     worker[].part_size, worker[].size - offset_in_file
                 )
-                var buffer = List[UInt8](length=length, fill=0)
-                var offset = 0
-                while offset < length:
-                    var n = external_call["read", Int64](
-                        Int(file.fd),
-                        buffer.unsafe_ptr().unsafe_offset(offset),
-                        length - offset,
-                    )
-                    if n < 0 and errno_value() == 4:
-                        continue
-                    if n <= 0:
-                        raise Error("Cannot read stable multipart source")
-                    offset += Int(n)
-                var part = upload_part(
+                var part = upload_part_file(
                     store,
                     worker[].bucket,
                     worker[].key,
                     worker[].upload_id,
                     number,
-                    buffer,
+                    file,
+                    Int64(offset_in_file),
+                    Int64(length),
                 )
                 worker[].outcomes[unsafe_offset=number - 1] = PartOutcome(
                     number, part.etag, False, None
                 )
                 if worker[].control:
-                    worker[].control.value()[].record_progress(length)
+                    _ = (
+                        worker[]
+                        .control.value()[]
+                        .completed_bytes.fetch_add(Int64(length))
+                    )
+                    _ = worker[].control.value()[].completed_parts.fetch_add(1)
             except:
                 worker[].outcomes[unsafe_offset=number - 1] = PartOutcome(
                     number, "", True, store.last_error.copy()
@@ -189,23 +181,24 @@ def concurrent_multipart_upload_file(
         concurrency < 1
         or concurrency > 16
         or part_size < 5 * 1024 * 1024
-        or part_size > 64 * 1024 * 1024
+        or Int64(part_size) > MAX_PART_BYTES
     ):
-        raise Error("Concurrency must be 1..16 and part_size 5..64 MiB")
+        raise Error("Concurrency must be 1..16 and part_size 5 MiB..5 GiB")
     var source_file = NativeFile(source)
     var size = source_file.length()
     if size == 0:
         return store.put(bucket, key, List[UInt8](), options)
-    var count = (size - 1) // part_size + 1
-    if count > 10000:
-        raise Error("Multipart upload exceeds 10000 parts")
+    var plan = plan_multipart(Int64(size), Int64(part_size))
+    var selected_part_size = Int(plan.part_size_bytes)
+    var count = plan.part_count
     var worker_count = min(concurrency, count)
     var upload_id = initiate(store, bucket, key, options)
     try:
         var outcomes = List[PartOutcome](
             length=count, fill=PartOutcome(0, "", False, None)
         )
-        var stopped = StopFlag(0)
+        var stopped = List[StopFlag](capacity=1)
+        stopped.append(StopFlag(0))
         var workers = List[MultipartWorker](capacity=worker_count)
         for i in range(worker_count):
             workers.append(
@@ -216,14 +209,14 @@ def concurrent_multipart_upload_file(
                     source,
                     upload_id,
                     size,
-                    part_size,
+                    selected_part_size,
                     i + 1,
                     worker_count,
                     count,
                     outcomes.unsafe_ptr().unsafe_origin_cast[
                         MutUntrackedOrigin
                     ](),
-                    Pointer(to=stopped).unsafe_origin_cast[
+                    Pointer(to=stopped[0]).unsafe_origin_cast[
                         MutUntrackedOrigin
                     ](),
                     store.transport.timeout_ms,
@@ -284,7 +277,7 @@ def controlled_multipart_upload_file[
         concurrency < 1
         or concurrency > 16
         or part_size < 5 * 1024 * 1024
-        or part_size > 64 * 1024 * 1024
+        or Int64(part_size) > MAX_PART_BYTES
     ):
         raise Error("Invalid controlled multipart bounds")
     var file = NativeFile(source)
@@ -297,19 +290,22 @@ def controlled_multipart_upload_file[
         raise Error("Upload cancelled before initiation")
     if not size:
         observer.on_progress(control.progress())
+        if observer.cancel_requested():
+            control.cancel()
         if control.is_cancelled():
             raise Error("Empty upload cancelled")
         return store.put(bucket, key, List[UInt8](), options)
-    var count = (size - 1) // part_size + 1
-    if count > 10000:
-        raise Error("Multipart upload exceeds 10000 parts")
+    var plan = plan_multipart(Int64(size), Int64(part_size))
+    var selected_part_size = Int(plan.part_size_bytes)
+    var count = plan.part_count
     var worker_count = min(concurrency, count)
     var upload_id = initiate(store, bucket, key, options)
     try:
         var outcomes = List[PartOutcome](
             length=count, fill=PartOutcome(0, "", False, None)
         )
-        var stopped = StopFlag(0)
+        var stopped = List[StopFlag](capacity=1)
+        stopped.append(StopFlag(0))
         var workers = List[MultipartWorker](capacity=worker_count)
         for i in range(worker_count):
             workers.append(
@@ -320,14 +316,14 @@ def controlled_multipart_upload_file[
                     source,
                     upload_id,
                     size,
-                    part_size,
+                    selected_part_size,
                     i + 1,
                     worker_count,
                     count,
                     outcomes.unsafe_ptr().unsafe_origin_cast[
                         MutUntrackedOrigin
                     ](),
-                    Pointer(to=stopped).unsafe_origin_cast[
+                    Pointer(to=stopped[0]).unsafe_origin_cast[
                         MutUntrackedOrigin
                     ](),
                     store.transport.timeout_ms,
@@ -335,7 +331,7 @@ def controlled_multipart_upload_file[
                     store.transport.max_response_bytes,
                     store.transport.verify_tls,
                     store.transport.ca_bundle,
-                    Pointer(to=control).unsafe_origin_cast[
+                    control._state.unsafe_ptr().unsafe_origin_cast[
                         MutUntrackedOrigin
                     ](),
                 )
@@ -358,7 +354,7 @@ def controlled_multipart_upload_file[
                 break
             launched += 1
         if launch_error:
-            stopped.store(1)
+            stopped[0].store(1)
         join_observed(ids, launched, control, observer)
         _ = workers
         _ = stopped
@@ -378,6 +374,19 @@ def controlled_multipart_upload_file[
             if not outcome.number or not outcome.etag:
                 raise Error("Controlled multipart did not finish every part")
             parts.append(CompletedPart(outcome.number, outcome.etag))
+        if control.is_cancelled():
+            store.last_error = S3Error(
+                0,
+                "Cancelled",
+                "Transfer cancelled before completion",
+                "",
+                "",
+                key,
+                "Cancelled",
+            )
+            raise Error(
+                "Upload cancelled before completion; all workers joined"
+            )
         return complete(store, bucket, key, upload_id, parts)
     except e:
         if control.observer_failed():

@@ -158,10 +158,13 @@ struct PutOptions(Copyable, Movable):
         self.conditions = Conditions()
 
 
-@fieldwise_init
 struct ObjectIdentifier(Copyable, Movable):
     var key: String
     var version_id: String
+
+    def __init__(out self, key: String, version_id: String = ""):
+        self.key = key
+        self.version_id = version_id
 
 
 @fieldwise_init
@@ -192,6 +195,7 @@ struct CopyOptions(Copyable, Movable):
     var source_version_id: String
     var source_conditions: Conditions
     var metadata_directive: String
+    var tagging_directive: String
     var destination: PutOptions
 
     def __init__(
@@ -200,10 +204,12 @@ struct CopyOptions(Copyable, Movable):
         metadata_directive: String = "COPY",
         destination: PutOptions = PutOptions(),
         source_conditions: Conditions = Conditions(),
+        tagging_directive: String = "COPY",
     ):
         self.source_version_id = source_version_id
         self.source_conditions = source_conditions.copy()
         self.metadata_directive = metadata_directive
+        self.tagging_directive = tagging_directive
         self.destination = destination.copy()
 
 

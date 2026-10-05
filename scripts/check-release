@@ -35,6 +35,9 @@ MOJO
 # The installed source is compiled from outside the checkout and does not use -I src.
 (cd "$mojo_s3_stage" && "$mojo_s3_stage/install with spaces/bin/mojo-s3-build" consumer.mojo consumer)
 "$mojo_s3_stage/consumer"
+cp tests/test_public_api.mojo "$mojo_s3_stage/public_api.mojo"
+(cd "$mojo_s3_stage" && "$mojo_s3_stage/install with spaces/bin/mojo-s3-build" public_api.mojo public_api)
+"$mojo_s3_stage/public_api"
 if "$mojo_s3_stage/mojo-s3-$mojo_s3_version/scripts/install" --prefix "$mojo_s3_stage/install with spaces"; then
     echo 'Repeated installation should refuse mixed source versions' >&2
     exit 1

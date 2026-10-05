@@ -93,66 +93,64 @@ def errno_value() -> Int:
     )
 
 
-def digest_file(
-    file: NativeFile, algorithm: String = "sha256"
+def digest_file_range(
+    file: NativeFile, offset: Int64, length: Int64, algorithm: String = "sha256"
 ) raises -> List[UInt8]:
-    file.rewind()
-    if algorithm == "crc32" or algorithm == "crc32c":
-        var crc = UInt32(0xFFFFFFFF)
-        var buffer = List[UInt8](length=65536, fill=0)
-        while True:
-            var n = external_call["read", Int64](
-                Int(file.fd), buffer.unsafe_ptr(), len(buffer)
-            )
-            if n < 0:
-                if errno_value() == 4:
-                    continue
-                raise Error("Cannot read checksum file")
-            if n == 0:
-                break
-            crc = crc_update(buffer, Int(n), crc, algorithm)
-        file.rewind()
-        return crc_bytes(crc)
-    if algorithm != "sha256" and algorithm != "sha1":
+    if offset < 0 or length < 0 or offset > Int64(9223372036854775807) - length:
+        raise Error("Invalid file digest range")
+    if algorithm not in ["sha256", "sha1", "crc32", "crc32c"]:
         raise Error("Unsupported file checksum algorithm")
     var context = DigestContext()
-    var native_algorithm = (
-        external_call["EVP_sha256", Raw]() if algorithm
-        == "sha256" else external_call["EVP_sha1", Raw]()
-    )
-    if (
-        external_call["EVP_DigestInit_ex", Int32](
-            context.ptr, native_algorithm, Optional[Raw](None)
+    var crc = UInt32(0xFFFFFFFF)
+    var is_crc = algorithm == "crc32" or algorithm == "crc32c"
+    if not is_crc:
+        var native_algorithm = (
+            external_call["EVP_sha256", Raw]() if algorithm
+            == "sha256" else external_call["EVP_sha1", Raw]()
         )
-        != 1
-    ):
-        raise Error("Cannot initialize SHA256")
-    var buffer = List[UInt8](length=65536, fill=0)
-    while True:
-        var n = external_call["read", Int64](
-            Int(file.fd), buffer.unsafe_ptr(), len(buffer)
-        )
-        if n < 0:
-            if errno_value() == 4:
-                continue
-            raise Error("Cannot read upload file")
-        if n == 0:
-            break
         if (
+            external_call["EVP_DigestInit_ex", Int32](
+                context.ptr, native_algorithm, Optional[Raw](None)
+            )
+            != 1
+        ):
+            raise Error("Cannot initialize file digest")
+    var buffer = List[UInt8](length=65536, fill=0)
+    var consumed = Int64(0)
+    while consumed < length:
+        var requested = min(Int64(len(buffer)), length - consumed)
+        var n = external_call["pread", Int64](
+            file.fd, buffer.unsafe_ptr(), requested, offset + consumed
+        )
+        if n < 0 and errno_value() == 4:
+            continue
+        if n <= 0:
+            raise Error("Cannot read stable file digest range")
+        if is_crc:
+            crc = crc_update(buffer, Int(n), crc, algorithm)
+        elif (
             external_call["EVP_DigestUpdate", Int32](
                 context.ptr, buffer.unsafe_ptr(), Int(n)
             )
             != 1
         ):
-            raise Error("SHA256 update failed")
+            raise Error("File digest update failed")
+        consumed += n
+    if is_crc:
+        return crc_bytes(crc)
     var digest = List[UInt8](length=32 if algorithm == "sha256" else 20, fill=0)
-    var length = UInt32(0)
+    var output_length = UInt32(0)
     if external_call["EVP_DigestFinal_ex", Int32](
-        context.ptr, digest.unsafe_ptr(), Pointer(to=length)
-    ) != 1 or Int(length) != len(digest):
-        raise Error("SHA256 finalization failed")
-    file.rewind()
+        context.ptr, digest.unsafe_ptr(), Pointer(to=output_length)
+    ) != 1 or Int(output_length) != len(digest):
+        raise Error("File digest finalization failed")
     return digest^
+
+
+def digest_file(
+    file: NativeFile, algorithm: String = "sha256"
+) raises -> List[UInt8]:
+    return digest_file_range(file, 0, Int64(file.length()), algorithm)
 
 
 def hash_file(file: NativeFile) raises -> String:

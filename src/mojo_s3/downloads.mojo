@@ -14,17 +14,19 @@ from mojo_s3.protocol import Field
 from mojo_s3.errors import S3Error
 from mojo_s3.transfer_control import (
     TransferControl,
+    TransferState,
     ProgressObserver,
     join_observed,
 )
 
 comptime DownloadRaw = Pointer[UInt8, MutUntrackedOrigin]
-comptime ControlPtr = Pointer[TransferControl, MutUntrackedOrigin]
+comptime ControlPtr = Pointer[TransferState, MutUntrackedOrigin]
 
 
 @fieldwise_init
 struct DownloadOutcome(Copyable, Movable):
     var length: Int
+    var completed_ranges: Int
     var error: Optional[S3Error]
     var failed: Bool
 
@@ -67,7 +69,7 @@ def download_worker(raw: DownloadRaw) abi("C") -> Optional[DownloadRaw]:
         while (
             number < worker[].count
             and worker[].stopped[].load() == 0
-            and not worker[].control[].is_cancelled()
+            and worker[].control[].cancelled.load() == 0
         ):
             try:
                 var start = number * worker[].range_size
@@ -103,21 +105,22 @@ def download_worker(raw: DownloadRaw) abi("C") -> Optional[DownloadRaw]:
                     if n <= 0:
                         raise Error("Cannot write downloaded range")
                     written += Int(n)
-                worker[].outcomes[unsafe_offset=number] = DownloadOutcome(
-                    length, None, False
-                )
-                worker[].control[].record_progress(length)
+                worker[].outcomes[unsafe_offset=worker[].first].length += length
+                worker[].outcomes[
+                    unsafe_offset=worker[].first
+                ].completed_ranges += 1
+                _ = worker[].control[].completed_bytes.fetch_add(Int64(length))
+                _ = worker[].control[].completed_parts.fetch_add(1)
             except:
-                worker[].outcomes[unsafe_offset=number] = DownloadOutcome(
-                    0, store.last_error.copy(), True
-                )
+                worker[].outcomes[
+                    unsafe_offset=worker[].first
+                ].error = store.last_error.copy()
+                worker[].outcomes[unsafe_offset=worker[].first].failed = True
                 worker[].stopped[].store(1)
                 break
             number += worker[].stride
     except:
-        worker[].outcomes[unsafe_offset=worker[].first] = DownloadOutcome(
-            0, None, True
-        )
+        worker[].outcomes[unsafe_offset=worker[].first].failed = True
         worker[].stopped[].store(1)
     return None
 
@@ -174,6 +177,8 @@ def concurrent_download_file[
             raise Error("Empty object changed before download")
         try:
             observer.on_progress(control.progress())
+            if observer.cancel_requested():
+                control.cancel()
         except e:
             control.mark_observer_failed()
             store.last_error = S3Error(
@@ -198,9 +203,10 @@ def concurrent_download_file[
         raise Error("Download exceeds bounded range count")
     var worker_count = min(workers_count, count)
     var outcomes = List[DownloadOutcome](
-        length=count, fill=DownloadOutcome(0, None, False)
+        length=worker_count, fill=DownloadOutcome(0, 0, None, False)
     )
-    var stopped = Atomic[Int32](0)
+    var stopped = List[Atomic[Int32]](capacity=1)
+    stopped.append(Atomic[Int32](0))
     var workers = List[DownloadWorker](capacity=worker_count)
     for i in range(worker_count):
         workers.append(
@@ -217,8 +223,10 @@ def concurrent_download_file[
                 worker_count,
                 count,
                 outcomes.unsafe_ptr().unsafe_origin_cast[MutUntrackedOrigin](),
-                Pointer(to=control).unsafe_origin_cast[MutUntrackedOrigin](),
-                Pointer(to=stopped).unsafe_origin_cast[MutUntrackedOrigin](),
+                control._state.unsafe_ptr().unsafe_origin_cast[
+                    MutUntrackedOrigin
+                ](),
+                Pointer(to=stopped[0]).unsafe_origin_cast[MutUntrackedOrigin](),
                 store.transport.timeout_ms,
                 store.transport.connect_timeout_ms,
                 store.transport.max_response_bytes,
@@ -246,7 +254,7 @@ def concurrent_download_file[
             break
         launched += 1
     if launch_failed:
-        stopped.store(1)
+        stopped[0].store(1)
     try:
         join_observed(threads, launched, control, observer)
     except e:
@@ -278,6 +286,8 @@ def concurrent_download_file[
             0, "Cancelled", "Transfer cancelled", "", "", key, "Cancelled"
         )
         raise Error("Download cancelled; all workers joined")
+    var completed_bytes = 0
+    var completed_ranges = 0
     for outcome in outcomes:
         if outcome.failed:
             store.last_error = outcome.error.copy()
@@ -292,8 +302,14 @@ def concurrent_download_file[
                     "LocalTransfer",
                 )
             raise Error("Concurrent download range failed; all workers joined")
-        if outcome.length <= 0:
-            raise Error("Concurrent download did not finish every range")
+        completed_bytes += outcome.length
+        completed_ranges += outcome.completed_ranges
+    if (
+        completed_bytes != metadata.size
+        or completed_ranges != count
+        or control.progress().completed_parts != count
+    ):
+        raise Error("Concurrent download did not finish exactly every range")
     if (
         file.length() != metadata.size
         or control.progress().completed_bytes != metadata.size
@@ -311,5 +327,16 @@ def concurrent_download_file[
             head, base64_encode(digest_file(file, metadata.checksum_algorithm))
         )
         metadata.checksum_state = "verified"
+    if control.is_cancelled():
+        store.last_error = S3Error(
+            0,
+            "Cancelled",
+            "Transfer cancelled before replacement",
+            "",
+            "",
+            key,
+            "Cancelled",
+        )
+        raise Error("Download cancelled before replacement; all workers joined")
     file.commit(destination)
     return metadata^

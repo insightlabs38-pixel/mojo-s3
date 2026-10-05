@@ -9,12 +9,23 @@ from mojo_s3 import (
     TransferManager,
     TransferOptions,
     ObjectIdentifier,
+    PartsPaginator,
+    MultipartUploadsPaginator,
+    multipart_copy_object,
+    get_object_tagging,
+    put_object_tagging,
+    delete_object_tagging,
 )
 from mojo_s3.crypto import bytes_of, sha256_hex
 from mojo_s3.http import CurlTransport, HttpRequest
 from mojo_s3.protocol import Field
 from mojo_s3.files import NativeFile, hash_file
-from mojo_s3.multipart import multipart_upload_file
+from mojo_s3.multipart import (
+    multipart_upload_file,
+    initiate,
+    upload_part_file,
+    abort,
+)
 from mojo_s3.concurrent import concurrent_multipart_upload_file
 from contract import run_contract
 
@@ -38,6 +49,8 @@ def main() raises:
     run_contract(store, bucket, prefix + "contract/")
     var key = prefix + "transfer"
     var copy_key = prefix + "copy"
+    var pending_key = prefix + "pending"
+    var pending_id = ""
     try:
         store.head_bucket(bucket)
         var transport = CurlTransport()
@@ -86,6 +99,40 @@ def main() raises:
         _ = concurrent_multipart_upload_file(
             store, bucket, key, source, 4, 5 * 1024 * 1024
         )
+        put_object_tagging(
+            store, bucket, key, [Field("qualification", "native")]
+        )
+        assert_equal(len(get_object_tagging(store, bucket, key)), 1)
+        _ = multipart_copy_object(store, bucket, key, bucket, copy_key)
+        assert_equal(len(get_object_tagging(store, bucket, copy_key)), 1)
+        _ = store.download_file(bucket, copy_key, destination)
+        var copied_file = NativeFile(destination)
+        assert_equal(hash_file(copied_file), expected)
+        delete_object_tagging(store, bucket, copy_key)
+        store.delete(bucket, copy_key)
+        pending_id = initiate(store, bucket, pending_key)
+        _ = upload_part_file(
+            store,
+            bucket,
+            pending_key,
+            pending_id,
+            1,
+            original,
+            0,
+            Int64(min(original.length(), 5 * 1024 * 1024)),
+        )
+        var parts = PartsPaginator(bucket, pending_key, pending_id, 1)
+        assert_equal(len(parts.next_page(store).parts), 1)
+        assert_true(parts.done)
+        var uploads = MultipartUploadsPaginator(bucket, prefix, 1)
+        var found = False
+        while not uploads.done:
+            for upload in uploads.next_page(store).uploads:
+                if upload.key == pending_key and upload.upload_id == pending_id:
+                    found = True
+        assert_true(found)
+        abort(store, bucket, pending_key, pending_id)
+        pending_id = ""
         var manager = TransferManager(
             store^, TransferOptions(1, 5 * 1024 * 1024, 4)
         )
@@ -99,6 +146,11 @@ def main() raises:
         # The runner reports this exact prefix for manual cleanup if denied.
         # Store may have moved into the manager; contract cleanup is independent.
         var cleanup = S3Store(config)
+        if pending_id:
+            try:
+                abort(cleanup, bucket, pending_key, pending_id)
+            except:
+                print("Orphan multipart upload ID:", pending_id)
         for cleanup_key in [key, copy_key]:
             try:
                 cleanup.delete(bucket, cleanup_key)

@@ -1,5 +1,4 @@
 from std.os import getenv
-from std.memory import Pointer
 from std.testing import assert_equal, assert_true
 from mojo_s3 import S3Store, S3Config, PutOptions
 from mojo_s3.concurrent import controlled_multipart_upload_file
@@ -11,14 +10,12 @@ from mojo_s3.transfer_control import (
 
 
 struct Observer(ProgressObserver):
-    var control: Pointer[TransferControl, MutUntrackedOrigin]
+    var requested: Bool
     var mode: Int
     var previous: Int
 
-    def __init__(out self, mut control: TransferControl, mode: Int):
-        self.control = Pointer(to=control).unsafe_origin_cast[
-            MutUntrackedOrigin
-        ]()
+    def __init__(out self, mode: Int):
+        self.requested = False
         self.mode = mode
         self.previous = 0
 
@@ -27,17 +24,22 @@ struct Observer(ProgressObserver):
         assert_true(progress.completed_bytes <= progress.total_bytes)
         self.previous = progress.completed_bytes
         if self.mode == 1:
-            self.control[].cancel()
+            self.requested = True
+        elif self.mode == 5:
+            self.requested = progress.completed_bytes == progress.total_bytes
         elif self.mode == 2:
             raise Error("Intentional upload observer failure")
+
+    def cancel_requested(self) -> Bool:
+        return self.requested
 
 
 def main() raises:
     var store = S3Store(S3Config.from_env())
     var bucket = getenv("S3_TEST_BUCKET")
-    for mode in range(5):
+    for mode in range(6):
         var control = TransferControl()
-        var observer = Observer(control, mode)
+        var observer = Observer(mode)
         if mode == 3:
             control.cancel()
         var failed = False

@@ -1,7 +1,17 @@
 """File transfer policy over the existing streaming and multipart primitives."""
 from mojo_s3.client import S3Store
-from mojo_s3.objects import PutOptions, PutResult, ObjectMetadata
+from mojo_s3.objects import (
+    PutOptions,
+    PutResult,
+    ObjectMetadata,
+    CopyOptions,
+    CopyResult,
+    ReadOptions,
+)
+from mojo_s3.multipart_copy import multipart_copy_object
+from mojo_s3.download_plan import plan_download
 from mojo_s3.files import NativeFile
+from mojo_s3.multipart_plan import MAX_PART_BYTES, FILE_BUFFER_BYTES
 from mojo_s3.multipart import multipart_upload_file
 from mojo_s3.concurrent import (
     concurrent_multipart_upload_file,
@@ -40,17 +50,26 @@ struct TransferOptions(Copyable, Movable):
             raise Error("Transfer workers must be 1..16")
         if (
             self.part_size < 5 * 1024 * 1024
-            or self.part_size > 64 * 1024 * 1024
+            or Int64(self.part_size) > MAX_PART_BYTES
         ):
-            raise Error("Transfer part size must be 5..64 MiB")
-        if self.max_in_flight_bytes < self.workers * self.part_size:
-            raise Error("Configured multipart buffers exceed transfer budget")
+            raise Error("Transfer part size must be 5 MiB..5 GiB")
+        if self.max_in_flight_bytes < self.workers * FILE_BUFFER_BYTES:
+            raise Error("Configured streaming buffers exceed transfer budget")
+
+    def download_range_size(self) raises -> Int:
+        self.validate()
+        return min(
+            min(self.part_size, 64 * 1024 * 1024),
+            self.max_in_flight_bytes // self.workers,
+        )
 
     def uses_multipart(self, size: Int) raises -> Bool:
         self.validate()
         if size < 0:
             raise Error("Transfer size must be nonnegative")
-        return size > 0 and size >= self.multipart_threshold
+        return size > 0 and (
+            size >= self.multipart_threshold or Int64(size) > MAX_PART_BYTES
+        )
 
 
 struct TransferManager(Movable):
@@ -97,6 +116,33 @@ struct TransferManager(Movable):
             options,
         )
 
+    def copy_object(
+        mut self,
+        source_bucket: String,
+        source_key: String,
+        bucket: String,
+        key: String,
+        options: CopyOptions = CopyOptions(),
+    ) raises -> CopyResult:
+        var metadata = self.store.head(
+            source_bucket,
+            source_key,
+            ReadOptions(options.source_version_id, options.source_conditions),
+        )
+        if Int64(metadata.size) <= MAX_PART_BYTES:
+            return self.store.copy_object(
+                source_bucket, source_key, bucket, key, options
+            )
+        return multipart_copy_object(
+            self.store,
+            source_bucket,
+            source_key,
+            bucket,
+            key,
+            options,
+            Int64(self.options.part_size),
+        )
+
     def download_file(
         mut self, bucket: String, key: String, destination: String
     ) raises -> ObjectMetadata:
@@ -104,6 +150,12 @@ struct TransferManager(Movable):
         var metadata = self.store.head(bucket, key)
         if metadata.size < self.options.multipart_threshold:
             return self.store.download_file(bucket, key, destination)
+        var plan = plan_download(
+            Int64(metadata.size),
+            Int64(self.options.part_size),
+            self.options.workers,
+            Int64(self.options.max_in_flight_bytes),
+        )
         var control = TransferControl()
         var observer = NoProgress()
         return concurrent_download_file(
@@ -111,8 +163,8 @@ struct TransferManager(Movable):
             bucket,
             key,
             destination,
-            self.options.workers,
-            self.options.part_size,
+            max(1, plan.workers),
+            Int(plan.range_size_bytes),
             control,
             observer,
         )
@@ -128,13 +180,20 @@ struct TransferManager(Movable):
         mut observer: Observer,
     ) raises -> ObjectMetadata:
         self.options.validate()
+        var metadata = self.store.head(bucket, key)
+        var plan = plan_download(
+            Int64(metadata.size),
+            Int64(self.options.part_size),
+            self.options.workers,
+            Int64(self.options.max_in_flight_bytes),
+        )
         return concurrent_download_file(
             self.store,
             bucket,
             key,
             destination,
-            self.options.workers,
-            self.options.part_size,
+            max(1, plan.workers),
+            Int(plan.range_size_bytes),
             control,
             observer,
         )

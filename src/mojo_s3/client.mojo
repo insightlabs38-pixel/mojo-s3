@@ -18,7 +18,7 @@ from mojo_s3.protocol import (
     get_header,
     uri_encode,
 )
-from mojo_s3.signing import sign
+from mojo_s3.signing import sign, Credentials
 from mojo_s3.crypto import sha256_hex, sha256, base64_encode, hex_encode
 from mojo_s3.config import S3Config, utc_timestamp, utc_seconds
 from mojo_s3.errors import S3Error, parse_s3_error
@@ -208,6 +208,7 @@ struct S3Store(ObjectStore):
         download_fd: Int32 = -1,
         upload_fd: Int32 = -1,
         upload_length: Int = 0,
+        upload_offset: Int64 = 0,
     ) raises -> HttpResponse:
         self.last_error = None
         var a = address(
@@ -221,7 +222,14 @@ struct S3Store(ObjectStore):
             payload_hash_override if payload_hash_override else sha256_hex(body)
         )
         for attempt in range(self.config.max_attempts):
-            var credentials = self.config.credential_snapshot()
+            var credentials: Credentials
+            try:
+                credentials = self.config.credential_snapshot()
+            except e:
+                self.last_error = (
+                    self.config.credential_cache.source.last_error.copy()
+                )
+                raise e^
             var timestamp = self.timestamp()
             var headers = extra_headers.copy()
             headers.append(Field("host", a.host))
@@ -270,6 +278,7 @@ struct S3Store(ObjectStore):
                     download_fd,
                     upload_fd,
                     upload_length,
+                    upload_offset,
                 )
             except e:
                 var code = self.transport.last_code
@@ -496,6 +505,15 @@ struct S3Store(ObjectStore):
             and options.metadata_directive != "REPLACE"
         ):
             raise Error("Copy metadata directive must be COPY or REPLACE")
+        if (
+            options.tagging_directive != "COPY"
+            and options.tagging_directive != "REPLACE"
+        ):
+            raise Error("Copy tagging directive must be COPY or REPLACE")
+        if options.tagging_directive == "COPY" and len(
+            options.destination.tags
+        ):
+            raise Error("Destination tags require tagging directive REPLACE")
         var headers = put_headers(options.destination, False)
         headers.append(
             Field(
@@ -507,6 +525,9 @@ struct S3Store(ObjectStore):
         )
         headers.append(
             Field("x-amz-metadata-directive", options.metadata_directive)
+        )
+        headers.append(
+            Field("x-amz-tagging-directive", options.tagging_directive)
         )
         for field in options.source_conditions.headers("x-amz-copy-source-"):
             headers.append(field.copy())

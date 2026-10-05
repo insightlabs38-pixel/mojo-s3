@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.."
 ./scripts/format --check
 mkdir -p build
 ./scripts/mojo precompile -I src src/mojo_s3 -o build/mojo_s3.mojoc
-for test in crypto signing signing_differential xml protocol retry multipart properties threads credentials ranges_pagination transfers data_plane identity checksum_algorithms transfer_control; do
+for test in crypto signing signing_differential xml protocol retry multipart properties threads credentials ranges_pagination transfers data_plane identity checksum_algorithms transfer_control multipart_plan download_plan public_api; do
     ./scripts/build "tests/test_${test}.mojo" "build/test_${test}"
     "build/test_${test}"
 done
@@ -19,6 +19,14 @@ done
 python3 scripts/run_data_plane_faults.py "$PWD/build/test_data_plane_faults"
 python3 scripts/run_identity_fixtures.py "$PWD/build/test_identity_network"
 python3 scripts/run_download_faults.py "$PWD/build/test_download_faults"
+./scripts/build tests/test_multipart_api_faults.mojo build/test_multipart_api_faults
+python3 scripts/run_multipart_api_faults.py "$PWD/build/test_multipart_api_faults"
+./scripts/build tests/test_assume_role.mojo build/test_assume_role
+python3 scripts/run_assume_role_fixtures.py "$PWD/build/test_assume_role"
+./scripts/build tests/test_large_stream.mojo build/test_large_stream
+python3 scripts/run_large_stream.py "$PWD/build/test_large_stream"
+./scripts/build tests/test_late_cancel.mojo build/test_late_cancel
+python3 scripts/run_late_cancel.py "$PWD/build/test_late_cancel"
 ./scripts/build tests/test_aws.mojo build/test_aws
 for example in examples/*.mojo; do
     ./scripts/build "$example" "build/$(basename "$example" .mojo)"

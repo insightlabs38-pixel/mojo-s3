@@ -38,6 +38,8 @@ jobs:
           import boto3
           client=boto3.client('s3',endpoint_url='http://127.0.0.1:19001',aws_access_key_id='mojo-ci-access',aws_secret_access_key='mojo-ci-secret',region_name='us-east-1')
           client.create_bucket(Bucket='mojo-ci-test')
+          client.create_bucket(Bucket='mojo-ci-versioned')
+          client.put_bucket_versioning(Bucket='mojo-ci-versioned',VersioningConfiguration={'Status':'Enabled'})
           PY
           python scripts/generate_transfer_fixture.py /tmp/mojo-source.bin
       - name: Native contracts, streaming, multipart and interoperability
@@ -47,10 +49,11 @@ jobs:
           S3_ACCESS_KEY: mojo-ci-access
           S3_SECRET_KEY: mojo-ci-secret
           S3_TEST_BUCKET: mojo-ci-test
+          S3_VERSIONED_TEST_BUCKET: mojo-ci-versioned
           S3_STREAM_SOURCE: /tmp/mojo-source.bin
           S3_STREAM_DESTINATION: /tmp/mojo-destination.bin
         run: |
-          for test in integration streaming multipart_integration concurrent_integration transfers_integration checksums_integration interop data_plane_integration downloads_integration controlled_upload; do
+          for test in integration streaming multipart_integration concurrent_integration transfers_integration checksums_integration interop data_plane_integration downloads_integration controlled_upload multipart_extra_integration tag_versions_integration; do
             scripts/build "tests/test_${test}.mojo" "build/test_${test}"
           done
           build/test_integration
@@ -62,6 +65,8 @@ jobs:
           build/test_data_plane_integration
           build/test_downloads_integration
           build/test_controlled_upload
+          build/test_multipart_extra_integration
+          build/test_tag_versions_integration
           python scripts/session_credentials.py "$PWD/build/test_integration" "$PWD/build/test_concurrent_integration"
           python scripts/interop.py "$PWD/build/test_interop"
           python scripts/stress.py "$PWD/build/test_integration"
@@ -118,3 +123,10 @@ jobs:
           python scripts/run_download_faults.py "$PWD/build/test_download_asan"
           scripts/build tests/test_controlled_upload.mojo build/test_controlled_upload_asan --sanitize address
           S3_ENDPOINT=http://127.0.0.1:19001 S3_REGION=us-east-1 S3_ACCESS_KEY=mojo-ci-access S3_SECRET_KEY=mojo-ci-secret S3_TEST_BUCKET=mojo-ci-test S3_STREAM_SOURCE=/tmp/mojo-source.bin build/test_controlled_upload_asan
+
+          for pair in multipart_api_faults:run_multipart_api_faults.py assume_role:run_assume_role_fixtures.py large_stream:run_large_stream.py late_cancel:run_late_cancel.py; do
+            test="${pair%%:*}"
+            runner="${pair#*:}"
+            scripts/build "tests/test_${test}.mojo" "build/test_${test}_asan" --sanitize address
+            S3_CHECK_STREAM_RSS=0 python "scripts/$runner" "$PWD/build/test_${test}_asan"
+          done

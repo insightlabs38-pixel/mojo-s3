@@ -14,14 +14,19 @@ from mojo_s3.transfer_control import (
 struct RecordingObserver(ProgressObserver):
     var last: Int
     var calls: Int
+    var last_parts: Int
 
     def __init__(out self):
         self.last = 0
         self.calls = 0
+        self.last_parts = 0
 
     def on_progress(mut self, progress: TransferProgress) raises:
         assert_true(progress.completed_bytes >= self.last)
         assert_true(progress.completed_bytes <= progress.total_bytes)
+        assert_true(progress.completed_bytes >= 0)
+        assert_true(progress.completed_parts >= self.last_parts)
+        self.last_parts = progress.completed_parts
         self.last = progress.completed_bytes
         self.calls += 1
 
@@ -38,7 +43,7 @@ def main() raises:
     var key = "mojo-downloads/" + random_token()
     try:
         _ = store.upload_file(bucket, key, source)
-        for workers in [1, 2, 4, 8]:
+        for workers in [1, 2, 4, 8, 16, 1, 2, 4, 8, 16]:
             var control = TransferControl()
             var observer = RecordingObserver()
             var metadata = concurrent_download_file(
@@ -55,6 +60,22 @@ def main() raises:
             assert_equal(hash_file(downloaded), expected)
             assert_equal(observer.last, metadata.size)
             assert_true(observer.calls > 0)
+        _ = store.put(bucket, key, bytes_of("x" * 4096))
+        for workers in [1, 2, 4, 8, 16]:
+            var exact_control = TransferControl()
+            var exact_observer = RecordingObserver()
+            _ = concurrent_download_file(
+                store,
+                bucket,
+                key,
+                destination,
+                workers,
+                1024,
+                exact_control,
+                exact_observer,
+            )
+            assert_equal(exact_observer.last, 4096)
+            assert_equal(exact_observer.last_parts, 4)
         _ = store.put(bucket, key, bytes_of("small"))
         var small_control = TransferControl()
         var small_observer = RecordingObserver()
@@ -86,5 +107,5 @@ def main() raises:
     finally:
         store.delete(bucket, key)
     print(
-        "Concurrent downloads: 1/2/4/8 workers, odd tails, small/empty and coordinator progress passed"
+        "Concurrent downloads: 1/2/4/8/16 workers, odd tails, small/empty and coordinator progress passed"
     )

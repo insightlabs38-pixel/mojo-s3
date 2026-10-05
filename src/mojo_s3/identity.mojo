@@ -3,15 +3,37 @@ from std.collections import List
 from std.ffi import external_call
 from std.memory import Pointer
 from std.io import FileHandle
-from mojo_s3.signing import Credentials
+from mojo_s3.signing import Credentials, sign
 from mojo_s3.credentials import validate_credentials
 from mojo_s3.http import CurlTransport, HttpRequest, HttpResponse
-from mojo_s3.protocol import Field, canonical_query, uri_encode, get_header
-from mojo_s3.crypto import bytes_of
+from mojo_s3.protocol import (
+    Field,
+    canonical_query,
+    uri_encode,
+    get_header,
+    Address,
+)
+from mojo_s3.crypto import bytes_of, sha256_hex
 from mojo_s3.xml import parse_xml, child_text
+from mojo_s3.clock import utc_timestamp
+from mojo_s3.errors import S3Error
 from mojo_s3.identity_json import CredentialJson
 
 comptime IdentityRaw = Pointer[UInt8, MutUntrackedOrigin]
+
+
+def identity_address(endpoint: String) raises -> Address:
+    var split = endpoint.find("://")
+    if split < 0:
+        raise Error("Credential endpoint requires a URL scheme")
+    var scheme = String(endpoint[byte=0:split])
+    var rest = String(endpoint[byte = split + 3 :])
+    var slash = rest.find("/")
+    var host = rest if slash < 0 else String(rest[byte=0:slash])
+    var path = "/" if slash < 0 else uri_encode(String(rest[byte=slash:]), True)
+    if not host:
+        raise Error("Credential endpoint host required")
+    return Address(scheme + "://" + host + path, host, path)
 
 
 def identity_clock() raises -> Int:
@@ -94,16 +116,18 @@ def json_snapshot(text: String) raises -> CredentialSnapshot:
     )
 
 
-def sts_snapshot(text: String) raises -> CredentialSnapshot:
+def sts_snapshot(
+    text: String, action: String = "AssumeRoleWithWebIdentity"
+) raises -> CredentialSnapshot:
     var nodes = parse_xml(text)
-    if nodes[0].name != "AssumeRoleWithWebIdentityResponse":
+    if nodes[0].name != action + "Response":
         raise Error("Unexpected STS web identity response")
     var found = -1
     for i in range(len(nodes)):
         if (
             nodes[i].name == "Credentials"
             and nodes[i].parent >= 0
-            and nodes[nodes[i].parent].name == "AssumeRoleWithWebIdentityResult"
+            and nodes[nodes[i].parent].name == action + "Result"
             and nodes[nodes[i].parent].parent == 0
         ):
             if found >= 0:
@@ -160,6 +184,64 @@ def trusted_identity_url(
     )
 
 
+@fieldwise_init
+struct RoleSourceDescription(Copyable, Movable):
+    var kind: String
+    var endpoint: String
+    var role_arn: String
+    var token_file: String
+    var session_name: String
+    var authorization: String
+    var ca_bundle: String
+    var local_fixture: Bool
+    var static_credentials: Credentials
+    var snapshot: Optional[CredentialSnapshot]
+
+
+def validate_role_session(
+    role_arn: String,
+    session_name: String,
+    external_id: String,
+    duration_seconds: Int,
+) raises:
+    if (
+        not role_arn.startswith("arn:")
+        or ":iam::" not in role_arn
+        or ":role/" not in role_arn
+        or role_arn.byte_length() > 2048
+    ):
+        raise Error("AssumeRole requires an IAM role ARN")
+    for b in role_arn.as_bytes():
+        if b < 33 or b > 126:
+            raise Error("Invalid role ARN")
+    if session_name.byte_length() < 2 or session_name.byte_length() > 64:
+        raise Error("Role session name must contain 2..64 ASCII characters")
+    for text in [session_name, external_id]:
+        for b in text.as_bytes():
+            if not (
+                b >= 65
+                and b <= 90
+                or b >= 97
+                and b <= 122
+                or b >= 48
+                and b <= 57
+                or b in bytes_of("+=,.@-_:/")
+            ):
+                raise Error("Invalid role session or external ID character")
+    if ":" in session_name or "/" in session_name:
+        raise Error("Invalid role session name")
+    if external_id and (
+        external_id.byte_length() < 2 or external_id.byte_length() > 1224
+    ):
+        raise Error("External ID must contain 2..1224 ASCII characters")
+    if duration_seconds != 0 and (
+        duration_seconds < 900 or duration_seconds > 43200
+    ):
+        raise Error(
+            "AssumeRole duration must be 900..43200 seconds or zero to omit"
+        )
+
+
 struct CredentialSource(Copyable, Movable):
     var kind: String
     var endpoint: String
@@ -169,6 +251,12 @@ struct CredentialSource(Copyable, Movable):
     var authorization: String
     var ca_bundle: String
     var local_fixture: Bool
+    var static_credentials: Credentials
+    var _role_source: Optional[RoleSourceDescription]
+    var _sts_region: String
+    var _external_id: String
+    var _duration_seconds: Int
+    var last_error: Optional[S3Error]
 
     def __init__(
         out self,
@@ -189,8 +277,195 @@ struct CredentialSource(Copyable, Movable):
         self.authorization = authorization
         self.ca_bundle = ca_bundle
         self.local_fixture = local_fixture
+        self.static_credentials = Credentials("", "", "")
+        self._role_source = None
+        self._sts_region = "us-east-1"
+        self._external_id = ""
+        self._duration_seconds = 0
+        self.last_error = None
 
-    def fetch(self) raises -> CredentialSnapshot:
+    @staticmethod
+    def static(credentials: Credentials) raises -> Self:
+        validate_credentials(credentials)
+        var result = Self("static")
+        result.static_credentials = credentials.copy()
+        return result^
+
+    @staticmethod
+    def assume_role(
+        source: Self,
+        role_arn: String,
+        session_name: String = "mojo-s3",
+        region: String = "us-east-1",
+        external_id: String = "",
+        duration_seconds: Int = 0,
+        *,
+        endpoint: String = "",
+        ca_bundle: String = "",
+        local_fixture: Bool = False,
+    ) raises -> Self:
+        validate_role_session(
+            role_arn, session_name, external_id, duration_seconds
+        )
+        if source.kind not in ["static", "web_identity", "container", "imds"]:
+            raise Error(
+                "AssumeRole supports one non-role source provider; role chains/cycles are refused"
+            )
+        if not region:
+            raise Error("STS region is required")
+        for b in region.as_bytes():
+            if not (b >= 97 and b <= 122 or b >= 48 and b <= 57 or b == 45):
+                raise Error("Invalid STS region")
+        var suffix = ".amazonaws.com.cn" if region.startswith(
+            "cn-"
+        ) else ".amazonaws.com"
+        var url = endpoint if endpoint else "https://sts." + region + suffix
+        trusted_identity_url(url, "assume_role", local_fixture)
+        var result = Self(
+            "assume_role",
+            url,
+            role_arn,
+            session_name=session_name,
+            ca_bundle=ca_bundle,
+            local_fixture=local_fixture,
+        )
+        result._role_source = RoleSourceDescription(
+            source.kind,
+            source.endpoint,
+            source.role_arn,
+            source.token_file,
+            source.session_name,
+            source.authorization,
+            source.ca_bundle,
+            source.local_fixture,
+            source.static_credentials.copy(),
+            None,
+        )
+        result._sts_region = region
+        result._external_id = external_id
+        result._duration_seconds = duration_seconds
+        return result^
+
+    def _fetch_role(mut self) raises -> CredentialSnapshot:
+        if not self._role_source:
+            raise Error("AssumeRole source provider missing")
+        validate_role_session(
+            self.role_arn,
+            self.session_name,
+            self._external_id,
+            self._duration_seconds,
+        )
+        var description = self._role_source.value().copy()
+        if description.kind not in [
+            "static",
+            "web_identity",
+            "container",
+            "imds",
+        ]:
+            raise Error("Invalid or recursive AssumeRole source")
+        var source = Self(
+            description.kind,
+            description.endpoint,
+            description.role_arn,
+            description.token_file,
+            description.session_name,
+            description.authorization,
+            description.ca_bundle,
+            description.local_fixture,
+        )
+        source.static_credentials = description.static_credentials.copy()
+        var cache = CredentialCache(source)
+        cache.snapshot = description.snapshot.copy()
+        var credentials = cache.resolve()
+        description.snapshot = cache.snapshot.copy()
+        self._role_source = description^
+        trusted_identity_url(self.endpoint, "assume_role", self.local_fixture)
+        var form: List[Field] = [
+            Field("Action", "AssumeRole"),
+            Field("Version", "2011-06-15"),
+            Field("RoleArn", self.role_arn),
+            Field("RoleSessionName", self.session_name),
+        ]
+        if self._external_id:
+            form.append(Field("ExternalId", self._external_id))
+        if self._duration_seconds:
+            form.append(
+                Field("DurationSeconds", String(self._duration_seconds))
+            )
+        var body = bytes_of(canonical_query(form))
+        var destination = identity_address(self.endpoint)
+        var timestamp = utc_timestamp()
+        var headers: List[Field] = [
+            Field("host", destination.host),
+            Field("content-type", "application/x-www-form-urlencoded"),
+            Field("x-amz-date", timestamp),
+        ]
+        if credentials.session_token:
+            headers.append(
+                Field("x-amz-security-token", credentials.session_token)
+            )
+        var signature = sign(
+            credentials,
+            self._sts_region,
+            "sts",
+            "POST",
+            destination.path,
+            List[Field](),
+            headers,
+            sha256_hex(body),
+            timestamp,
+        )
+        headers.append(Field("authorization", signature.authorization))
+        var transport = CurlTransport(
+            timeout_ms=5000,
+            connect_timeout_ms=1000,
+            max_response_bytes=65536,
+            verify_tls=True,
+            ca_bundle=self.ca_bundle,
+        )
+        var response = transport.send(
+            HttpRequest("POST", destination.url, headers^, body^)
+        )
+        if response.status != 200:
+            var code = "CredentialProviderFailure"
+            var request_id = ""
+            try:
+                var nodes = parse_xml(
+                    String(
+                        from_utf8=Span(
+                            unsafe_ptr=response.body.unsafe_ptr(),
+                            length=len(response.body),
+                        )
+                    )
+                )
+                if nodes[0].name == "ErrorResponse":
+                    request_id = child_text(nodes, 0, "RequestId")
+                    for i in range(len(nodes)):
+                        if nodes[i].parent == 0 and nodes[i].name == "Error":
+                            code = child_text(nodes, i, "Code")
+            except:
+                pass
+            self.last_error = S3Error(
+                response.status,
+                code,
+                "AssumeRole credential exchange failed",
+                request_id,
+                "",
+                "",
+                "CredentialRefresh",
+            )
+            raise Error("AssumeRole credential exchange failed")
+        return sts_snapshot(response_text(response), "AssumeRole")
+
+    def fetch(mut self) raises -> CredentialSnapshot:
+        self.last_error = None
+        if self.kind == "static":
+            validate_credentials(self.static_credentials)
+            return CredentialSnapshot(
+                self.static_credentials.copy(), 9223372036854775807
+            )
+        if self.kind == "assume_role":
+            return self._fetch_role()
         if self.kind not in ["web_identity", "container", "imds"]:
             raise Error("Unsupported workload credential source")
         trusted_identity_url(self.endpoint, self.kind, self.local_fixture)

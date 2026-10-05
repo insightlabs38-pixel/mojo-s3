@@ -73,22 +73,42 @@ def receive(
     return n
 
 
+@fieldwise_init
+struct UploadInput(Movable):
+    var fd: Int32
+    var offset: Int64
+    var remaining: Int64
+
+
 def provide(
     data: Raw,
     size: UInt,
     count: UInt,
-    context: Pointer[Int32, MutUntrackedOrigin],
+    context: Pointer[UploadInput, MutUntrackedOrigin],
 ) abi("C") -> UInt:
     if size and count > UInt(-1) // size:
         return UInt(0x10000000)  # CURL_READFUNC_ABORT
+    if size * count > UInt(9223372036854775807):
+        return UInt(0x10000000)
+    if size * count == 0:
+        return 0
+    if context[].remaining == 0:
+        return 0
+    var requested = min(
+        min(Int64(size * count), context[].remaining), Int64(65536)
+    )
     while True:
-        var n = external_call["read", Int64](
-            Int(context[]), data, Int(size * count)
+        var n = external_call["pread", Int64](
+            context[].fd, data, requested, context[].offset
         )
         if n < 0:
             if errno_value() == 4:
                 continue
             return UInt(0x10000000)
+        if n == 0:
+            return UInt(0x10000000)  # Premature EOF must never complete a part.
+        context[].offset += n
+        context[].remaining -= n
         return UInt(n)
 
 
@@ -142,7 +162,14 @@ struct CurlTransport(Movable):
         download_fd: Int32 = -1,
         upload_fd: Int32 = -1,
         upload_length: Int = 0,
+        upload_offset: Int64 = 0,
     ) raises -> HttpResponse:
+        if (
+            upload_length < 0
+            or upload_offset < 0
+            or upload_offset > Int64(9223372036854775807) - Int64(upload_length)
+        ):
+            raise Error("Invalid streamed upload range")
         external_call["curl_easy_reset", NoneType](self.handle)
         self.last_code = 0
         self.last_response_bytes = 0
@@ -192,14 +219,16 @@ struct CurlTransport(Movable):
             self.option(181, Int(3))  # HTTP(S) protocols only
             # Do not request automatic content decoding: S3 bytes are opaque.
             self.option(158, Int(0))  # HTTP_CONTENT_DECODING
-            var input_fd = upload_fd
+            var input = UploadInput(
+                upload_fd, upload_offset, Int64(upload_length)
+            )
             if request.method == "HEAD":
                 self.option(44, Int(1))
             elif upload_fd >= 0:
                 self.option(46, Int(1))  # UPLOAD
                 self.option(30115, Int64(upload_length))
                 self.option(20012, provide)
-                self.option(10009, Pointer(to=input_fd))
+                self.option(10009, Pointer(to=input))
             elif (
                 request.method == "PUT"
                 or request.method == "POST"
@@ -208,6 +237,7 @@ struct CurlTransport(Movable):
                 self.option(30120, Int64(len(request.body)))
                 self.option(10015, request.body.unsafe_ptr())
             var code = external_call["curl_easy_perform", Int32](self.handle)
+            _ = input  # Keep synchronous callback storage alive through perform.
             self.last_code = Int(code)
             self.last_response_bytes = body.received
             if code != 0:
