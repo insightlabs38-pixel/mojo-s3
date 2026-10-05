@@ -1,5 +1,7 @@
 name: native-mojo
-on: [push, pull_request]
+on: [push, pull_request, workflow_call]
+permissions:
+  contents: read
 jobs:
   unit-and-local-contract:
     runs-on: ubuntu-24.04
@@ -48,7 +50,7 @@ jobs:
           S3_STREAM_SOURCE: /tmp/mojo-source.bin
           S3_STREAM_DESTINATION: /tmp/mojo-destination.bin
         run: |
-          for test in integration streaming multipart_integration concurrent_integration transfers_integration checksums_integration interop; do
+          for test in integration streaming multipart_integration concurrent_integration transfers_integration checksums_integration interop data_plane_integration downloads_integration controlled_upload; do
             scripts/build "tests/test_${test}.mojo" "build/test_${test}"
           done
           build/test_integration
@@ -57,6 +59,9 @@ jobs:
           build/test_concurrent_integration
           build/test_transfers_integration
           build/test_checksums_integration
+          build/test_data_plane_integration
+          build/test_downloads_integration
+          build/test_controlled_upload
           python scripts/session_credentials.py "$PWD/build/test_integration" "$PWD/build/test_concurrent_integration"
           python scripts/interop.py "$PWD/build/test_interop"
           python scripts/stress.py "$PWD/build/test_integration"
@@ -100,9 +105,16 @@ jobs:
           build/test_concurrent_integration
           build/test_transfers_integration
           build/test_extended_keys
+          build/test_data_plane_integration
+          build/test_downloads_integration
+          build/test_controlled_upload
           python scripts/interop.py "$PWD/build/test_interop"
           python scripts/run_vhost_tls.py /tmp/zeros3 "$PWD/build/test_vhost_tls"
       - name: AddressSanitizer concurrency failure checks
         run: |
           scripts/build tests/test_concurrent_failures.mojo build/test_concurrent_asan --sanitize address
           python scripts/run_fault_tests.py "$PWD/build/test_concurrent_asan"
+          scripts/build tests/test_download_faults.mojo build/test_download_asan --sanitize address
+          python scripts/run_download_faults.py "$PWD/build/test_download_asan"
+          scripts/build tests/test_controlled_upload.mojo build/test_controlled_upload_asan --sanitize address
+          S3_ENDPOINT=http://127.0.0.1:19001 S3_REGION=us-east-1 S3_ACCESS_KEY=mojo-ci-access S3_SECRET_KEY=mojo-ci-secret S3_TEST_BUCKET=mojo-ci-test S3_STREAM_SOURCE=/tmp/mojo-source.bin build/test_controlled_upload_asan

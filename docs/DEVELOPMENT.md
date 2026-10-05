@@ -100,3 +100,12 @@ outside the checkout. This does not publish anything. `scripts/check` includes
 credential/profile/region, suffix-range/pagination, and transfer-policy fixtures
 and compiles all examples. Live checks additionally run transfer-manager file
 roundtrips when source/destination paths are set. See INSTALLATION.md and API.md.
+
+## Phase-2 checks
+
+`scripts/check` includes native credential provider fixtures, batch/copy faults,
+checksum vectors and cancellation/range/write-failure cleanup. New live tests are
+`test_data_plane_integration`, `test_downloads_integration`, `test_controlled_upload`
+and `test_checksums_integration`. `test_versions` requires an explicitly versioned
+local fixture. AWS is separately authorized via [AWS_QUALIFICATION.md](AWS_QUALIFICATION.md).
+The hosted baseline [run 37248323851](https://github.com/insightlabs38-pixel/mojo-s3/actions/runs/37248323851) passed.

@@ -16,5 +16,12 @@ candidate and no tag or upstream publication has been created.
 - Experimental file transfer manager with automatic multipart selection and
   explicit worker/part-buffer bounds.
 
+- Typed CopyObject/DeleteObjects/HeadBucket, common conditions/opaque versions,
+  metadata/tags/storage/encryption options and structured region diagnostics.
+- Native experimental Web Identity/container/IMDSv2 with expiration-aware refresh.
+- Full-object SHA256/SHA1/CRC32/CRC32C; composite/unsupported integrity states.
+- Bounded atomic concurrent downloads, coordinator progress and multipart cancellation.
+- Explicit existing-bucket AWS harness and deterministic source-release dry run.
+
 See STATUS.md and RELEASE_READINESS.md under docs for verification and pending
 qualification. TSan remains strictly gated on a usable upstream runtime.

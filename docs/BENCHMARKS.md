@@ -48,3 +48,33 @@ build/benchmark
 For stronger conclusions, repeat trials, report distributions, separate backend
 cache/deduplication states, measure connection reuse controls, and test realistic
 remote latencies and object sizes. Those sustained performance studies are pending.
+
+## October 5 phase-2 local samples
+
+Mojo1.1.0, Linux6.18.44 x86-64/glibc2.41, MinIO2025-04-22 on loopback,
+32MiB position-sensitive file, 5MiB parts/ranges. Three samples per operation;
+medians below. RSS uses Linux wait4 per-process ru_maxrss. Wall time includes
+process startup and upload cleanup. Warm local page cache and concurrent compiler
+load make these diagnostic samples, not cloud-throughput or fastest claims.
+
+| Operation | Workers | Median seconds | Median RSS KiB |
+|---|---:|---:|---:|
+| stream | 1 | 0.0555 | 51416 |
+| download | 1 | 0.0909 | 51416 |
+| download | 2 | 0.0800 | 51416 |
+| download | 4 | 0.0856 | 51416 |
+| download | 8 | 0.1114 | 51496 |
+| multipart | 1 | 0.1946 | 51416 |
+| upload | 1 | 0.1849 | 51416 |
+| upload | 2 | 0.2044 | 51416 |
+| upload | 4 | 0.2005 | 54672 |
+| upload | 8 | 0.2309 | 79664 |
+| sha256 | 1 | 0.0625 | 51416 |
+| sha1 | 1 | 0.0348 | 51416 |
+| crc32 | 1 | 0.4366 | 51416 |
+| crc32c | 1 | 0.3431 | 51416 |
+
+Credential refresh network timing is fixture-only and backend/timeouts dominate;
+no AWS latency estimate is made. CRC bitwise implementations are intentionally
+simple and materially slower here; optimization should follow actual application
+profiles and retain independent checksum oracles.

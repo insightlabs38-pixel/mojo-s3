@@ -35,4 +35,6 @@ native curl/crypto/XML linkage. This run did not install the CLI, test Pixi's
 build backend, register a tin, or publish a version. No working `shelf add mojo-s3`
 command is promised. The tested source-prefix route remains available while
 registry/native-linker integration is qualified. Publication also requires a
-pushed clean commit and an author token; this local-only run publishes nothing.
+pushed clean commit and an author token. No package has been published.
+See [TRUSTED_PUBLISHING.md](TRUSTED_PUBLISHING.md) for the source dry-run workflow
+and the owner-side setup steps.

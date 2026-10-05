@@ -65,7 +65,7 @@ ETag is not an MD5 promise. A range response is not compared to a full-object
 checksum. `ObjectRange(start, end=-1)` supports closed and open-ended inclusive
 ranges; suffix ranges and file range downloads are pending.
 
-Concurrent downloads, cancellation, progress callbacks, automatic multipart
+Resumable state, generic source/sink traits, automatic multipart
 selection and resumable uploads are not currently implemented. Use independent
 stores for application-managed parallel object operations and bound memory and
 worker counts explicitly.
@@ -96,6 +96,14 @@ _ = manager.download_file("bucket", "artifact", "/path/to/destination")
 
 The layer is experimental and has one active owner. Inspect
 `manager.store.last_error` immediately after request failures. Keep sources
-unchanged during upload. Cancellation, progress callbacks, concurrent ranged
-downloads and resumable state remain future work; low-level operations stay
+unchanged during upload. Progress/cancellation and concurrent ranged downloads are now experimental
+([PHASE2.md](PHASE2.md)); resumable state remains future work; low-level operations stay
 available.
+
+## Phase-2 transfer controls
+
+Large manager downloads now use validated deterministic ranges into one temporary
+file, join all workers, verify final size/checksum, fsync and atomically replace.
+Progress observers run on the coordinator; callback failure cancels work and joins
+before cleanup. Nonempty controlled uploads use multipart to support pre-commit
+abort. See [PHASE2.md](PHASE2.md) for lifetime, buffer-budget and commit boundaries.

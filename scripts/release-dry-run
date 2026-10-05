@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+if [[ -n "$(git status --porcelain --untracked-files=normal)" ]]; then
+    echo 'Release dry-run requires a clean checkout' >&2
+    exit 1
+fi
+scripts/check-release
+mkdir -p build/release
+scripts/package build/release/mojo-s3-"$(cat VERSION)".tar.gz
+scripts/package build/release/reproducibility.tar.gz
+cmp build/release/mojo-s3-"$(cat VERSION)".tar.gz build/release/reproducibility.tar.gz
+rm build/release/reproducibility.tar.gz build/release/reproducibility.tar.gz.sha256
+python3 - <<'PY'
+from pathlib import Path
+v=Path('VERSION').read_text().strip()
+s=Path('CHANGELOG.md').read_text()
+section=s.split('## '+v,1)[1].split('\n',1)[1].split('\n## ',1)[0].strip()
+Path('build/release/RELEASE_NOTES.md').write_text('# Mojo-S3 '+v+' (dry run)\n\n'+section+'\n\nSource artifact; Linux x86-64, Mojo 1.1.0. No release was published.\n')
+PY

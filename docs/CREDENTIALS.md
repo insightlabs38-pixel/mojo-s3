@@ -99,7 +99,8 @@ refresh coordination. Construct a new configuration/store when rotating credenti
 never mutate a store concurrently.
 
 ECS, EC2 IMDS, web identity, AssumeRole/STS, SSO, `credential_process`, role chaining
-and their refresh semantics are not implemented. A profile containing only these
+remain outside the static default chain. Native opt-in Web Identity/container/IMDSv2
+providers and refresh semantics are now experimental; see [PHASE2.md](PHASE2.md). A profile containing only these
 settings cannot resolve credentials. Session-token signing is supported when keys
 and a token are provided by a supported source.
 

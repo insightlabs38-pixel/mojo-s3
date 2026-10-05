@@ -1,15 +1,45 @@
-#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "$0")/.."
-mojo_s3_version="$(cat VERSION)"
-mojo_s3_output="${1:-build/mojo-s3-${mojo_s3_version}.tar.gz}"
-mkdir -p "$(dirname "$mojo_s3_output")"
-mojo_s3_stage="$(mktemp -d)"
-trap 'rm -rf "$mojo_s3_stage"' EXIT
-mojo_s3_name="mojo-s3-${mojo_s3_version}"
-mkdir "$mojo_s3_stage/$mojo_s3_name"
-cp -R src scripts tests examples docs README.md LICENSE VERSION package.json CHANGELOG.md CONTRIBUTING.md "$mojo_s3_stage/$mojo_s3_name/"
-# Source packages exclude local interpreter caches and never contain compiled .mojoc files.
-find "$mojo_s3_stage" -type d -name __pycache__ -prune -exec rm -rf '{}' +
-tar -czf "$mojo_s3_output" -C "$mojo_s3_stage" "$mojo_s3_name"
-echo "$mojo_s3_output"
+#!/usr/bin/env python3
+"""Deterministic source archive; no registry publication or compiled ABI."""
+import gzip
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tarfile
+
+root = Path(__file__).resolve().parent.parent
+version = (root / 'VERSION').read_text().strip()
+output = Path(sys.argv[1] if len(sys.argv) > 1 else root / 'build' / f'mojo-s3-{version}.tar.gz')
+output.parent.mkdir(parents=True, exist_ok=True)
+def git(*args, default='unknown'):
+    try:
+        return subprocess.check_output(['git', '-C', str(root), *args], stderr=subprocess.DEVNULL, text=True).strip()
+    except subprocess.CalledProcessError:
+        return default
+commit = git('rev-parse', 'HEAD')
+epoch = int(os.environ.get('SOURCE_DATE_EPOCH', git('show', '-s', '--format=%ct', 'HEAD', default='0')))
+files = {}
+for name in ['src', 'scripts', 'tests', 'examples', 'docs', 'README.md', 'LICENSE', 'VERSION', 'package.json', 'CHANGELOG.md', 'CONTRIBUTING.md']:
+    path = root / name
+    for item in sorted(path.rglob('*') if path.is_dir() else [path]):
+        if item.is_file() and '__pycache__' not in item.parts and item.suffix not in ['.pyc', '.mojoc']:
+            if item.is_symlink():
+                raise SystemExit(f'Symlinks are not permitted in source archives: {item}')
+            files[item.relative_to(root).as_posix()] = (item.read_bytes(), 0o755 if os.access(item, os.X_OK) else 0o644)
+source_digest = hashlib.sha256()
+for name, (data, _) in sorted(files.items()):
+    source_digest.update(name.encode() + b'\0' + hashlib.sha256(data).digest())
+files['BUILDINFO.json'] = ((json.dumps(dict(version=version, source_commit=commit, source_tree_sha256=source_digest.hexdigest(), source_date_epoch=epoch, compiler='Mojo 1.1.0', platform='linux-x86_64', artifact='source; native dependencies required'), sort_keys=True, indent=2) + '\n').encode(), 0o644)
+files['SHA256SUMS'] = (''.join(f'{hashlib.sha256(data).hexdigest()}  {name}\n' for name, (data, _) in sorted(files.items())).encode(), 0o644)
+with output.open('wb') as raw, gzip.GzipFile(filename='', fileobj=raw, mode='wb', mtime=0) as compressed, tarfile.open(fileobj=compressed, mode='w', format=tarfile.PAX_FORMAT) as archive:
+    for name, (data, mode) in sorted(files.items()):
+        entry = tarfile.TarInfo(f'mojo-s3-{version}/{name}')
+        entry.size, entry.mode, entry.mtime = len(data), mode, epoch
+        entry.uid = entry.gid = 0
+        entry.uname = entry.gname = ''
+        archive.addfile(entry, io.BytesIO(data))
+output.with_suffix(output.suffix + '.sha256').write_text(f'{hashlib.sha256(output.read_bytes()).hexdigest()}  {output.name}\n')
+print(output)

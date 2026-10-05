@@ -21,7 +21,7 @@ No Mojo binary ABI compatibility is promised.
 | Public, intended stable | `protocol.Field` | Name/value pairs for metadata and advanced signed headers |
 | Public, intended stable | `S3Store.presign`, `upload_file`, `download_file` | S3 capability and synchronous file transfers |
 | Public, intended stable | `objects.ListPaginator`, `credentials.StaticCredentials`, `EnvironmentCredentials`, `SharedFileCredentials` | Bounded raw pages and owned static credential snapshots |
-| Experimental | `credentials.CredentialProvider`, `transfers.TransferManager`, `TransferOptions` | Provider extension and file transfer policy; refresh, cancellation and progress are not implemented |
+| Experimental | `credentials.CredentialProvider`, `transfers.TransferManager`, `TransferOptions` | Provider extension and file transfer policy; refresh, cancellation, progress and ranged downloads remain experimental; see PHASE2.md |
 | Experimental | `http.CurlTransport` constructor and moving it into `S3Store` | Transport tuning; backend-specific customization |
 | Experimental | `multipart.CompletedPart`, `initiate`, `upload_part`, `complete`, `abort`, `multipart_upload_file` | Explicit upload lifecycle and cleanup responsibilities |
 | Experimental | `concurrent.concurrent_multipart_upload_file` | Bounded Linux pthread upload; dynamic race qualification pending |
@@ -98,3 +98,8 @@ object length. `ListPaginator(bucket, options)` retains only continuation state;
 call `next_page(store)` while `done` is false. Returned pages remain owned and
 raw server tokens remain available. Non-advancing tokens and a configurable
 `max_pages` ceiling fail explicitly.
+
+Phase-2 typed object APIs and the experimental ownership/refresh/transfer stability
+classification are detailed in [PHASE2.md](PHASE2.md). `presign` now borrows its
+store mutably to resolve expiring credentials. Source compatibility is tested;
+compiled package ABI compatibility is not promised.

@@ -7,7 +7,7 @@ provider-neutral `ObjectStore` contract and an S3 backend.
 
 **0.1.0-dev is unreleased development software, not a release candidate.** The
 qualified baseline is Linux x86-64 with Mojo 1.1.0. Other platforms and compiler
-versions are unqualified. [API and version policy](docs/API.md).
+released versions are unqualified; an exact nightly is qualified only in an isolated experiment. [API and version policy](docs/API.md).
 
 ## Install and build an application
 
@@ -15,7 +15,7 @@ Install Mojo 1.1.0 from its official distribution and the native dependencies:
 
 ```sh
 sudo apt-get install libcurl4-openssl-dev libssl-dev libxml2-dev openssl
-git clone https://github.com/insightlabs38-pixel/mojo-s3.git
+git clone --branch sdk/s3-phase2 https://github.com/insightlabs38-pixel/mojo-s3.git
 cd mojo-s3
 scripts/install --prefix "$HOME/.local"
 ```
@@ -77,8 +77,10 @@ for explicit configuration. [Configuration and custom CA](docs/CONFIGURATION.md)
 Implemented capabilities include binary CRUD and metadata, ListObjectsV2 pages, bounded pagination
 and delimiter prefixes, inclusive closed/open-ended and suffix ranges, SigV4 and presigned
 GET/PUT, streamed file transfers, multipart uploads, bounded native concurrent
-multipart, retries, connection reuse, verified TLS/custom CA and full-object
-SHA-256 integrity checks. Calls raise standard Mojo `Error` with request-associated
+multipart and ranged downloads, retries, connection reuse, verified TLS/custom CA,
+SHA256/SHA1/CRC32/CRC32C full-object integrity, typed conditions/version IDs, copy,
+batch deletion, and object encryption/storage options. Experimental native Web
+Identity/container/IMDSv2 providers refresh expiring credentials. Calls raise standard Mojo `Error` with request-associated
 `S3Error` detail in `store.last_error`.
 
 The [compatibility matrix](docs/COMPATIBILITY.md) records actual tests against
@@ -96,9 +98,10 @@ experiment passes its prerequisites and the unchanged SDK gate; this does not
 qualify the released runtime or install that experimental runtime for users.
 
 `TransferManager` selects streamed or multipart file upload using a configured
-threshold, worker count and part-buffer budget, and provides atomic streaming
-downloads. Concurrent downloads, cancellation/progress and composite/CRC/MD5
-integrity validation remain pending. Do not treat ETags as content hashes.
+threshold, worker count and part-buffer budget, and provides atomic streamed or
+concurrent ranged downloads. Experimental coordinating-thread progress/cancellation
+joins every worker and aborts uncommitted multipart uploads. Composite checksum
+combination and resumable state remain pending. [Phase-2 semantics](docs/PHASE2.md). Do not treat ETags as content hashes.
 
 ## Development and further reading
 
@@ -114,4 +117,4 @@ and [contributing](CONTRIBUTING.md). Executable [basic](examples/basic.mojo) and
 [Current status](docs/STATUS.md)
 
 Source installation and registry evaluation: [INSTALLATION.md](docs/INSTALLATION.md).
-Current local qualification and remaining release work: [RELEASE_READINESS.md](docs/RELEASE_READINESS.md).
+Current qualification and remaining release work: [RELEASE_READINESS.md](docs/RELEASE_READINESS.md).

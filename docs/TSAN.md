@@ -129,3 +129,27 @@ No binary patch, preload allocator shim, mmap interception bypass, sanitizer
 suppression, or race-free claim is included. Run the unchanged strict gate with an upstream-fixed supported toolchain before
 claiming released-runtime qualification. The isolated experiment above advances
 local investigation without changing this released-runtime limitation.
+
+## October 5 phase-2 evidence and unresolved OpenSSL warning
+
+The full 2x2 test distinguishes startup from the LLVM interceptor bug: ordinary
+AsyncRT fails with both LLVM variants; the genuinely sanitizer-aware closure
+passes loader/hello/race with both. The narrow LLVM fix is independently valid
+and not required for that Mojo startup repair. Candidate public Modular filegroup
+builds only under the TSan config, but the production wheel/link selection layer
+requires maintainer integration.
+
+New download faults, ranged1/2/4/8 odd/small/empty, controlled multipart progress/
+cancellation/partial launch and TransferManager passed individually under the
+exact isolated nightly/current LLVM closure. ASan passed the same new paths.
+
+A later full strict gate stopped in the unchanged cold-start thread smoke with
+an OpenSSL-internal report (symbolized near EVP_SKEYMGMT_get0_imp_settable_params).
+Ten focused repeats reported6/10 with current LLVM and3/10 with historical LLVM,
+same executable and AsyncRT/Support/CompilerRT. This is an unresolved dependency
+diagnostic; uninstrumented OpenSSL's synchronization limits visibility, and these
+observations alone do not classify it as a real OpenSSL defect or false positive.
+No suppressions, test weakening or silent rerun-to-pass was used. Earlier passing
+strict candidate qualification remains preserved, with its limited consistency
+clearly stated. Strict check-tsan is byte-identical to baseline; released-Mojo
+TSan and a consistently clean entire native closure remain unqualified.

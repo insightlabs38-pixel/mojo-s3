@@ -1,6 +1,6 @@
 # Verified compatibility
 
-Local tests on October 4, 2026 with synthetic local credentials. AWS credentials
+Local tests on October 4–5, 2026 with synthetic local credentials. AWS credentials
 were not attached. Results apply to the versions and cases listed, not every
 S3-compatible server or all AWS behavior.
 
@@ -25,7 +25,13 @@ ZEROS3 was built with Go 1.27.0 from the public repository
 | boto3 bidirectional 32 MiB transfer | Passed | Untested | Passed | Untested |
 | Virtual-host HTTP and HTTPS | Untested | Untested | Passed | Untested |
 | Live session-token credentials | Passed with local STS | Untested | Not supported by backend | Untested |
-| Negotiated full-object SHA256 checksums | Passed | Untested | Untested | Untested |
+| Negotiated full-object SHA256/SHA1/CRC32/CRC32C | Passed | Untested | Untested | Untested |
+| HeadBucket/copy metadata/batch delete | Passed | Sequence not reached | Passed | Untested |
+| Typed If-Match GET rejection | Passed | FAILED: wrong ETag accepted | Passed | Untested |
+| Version-aware GET/HEAD/copy/delete | Passed (local versioned fixture) | Untested | Untested | Untested |
+| Concurrent download 1/2/4/8, odd/small/empty | Passed | Passed | Passed | Untested |
+| Controlled multipart progress/cancel/abort | Passed | Passed | Passed | Untested |
+| Web Identity/container/IMDSv2 refresh | Local deterministic fixtures | Local fixtures only | Local fixtures only | Untested |
 
 MinIO is RELEASE.2025-04-22T22-12-26Z. The common contract includes spaces, +, %, ?,
 #, &, =, Unicode, literal `%2F`, slash-separated and long keys, and verifies binary
@@ -83,3 +89,8 @@ manager roundtrips, 1/2/4/8-worker multipart and verified HTTPS.
 
 These current results use stable Mojo 1.1.0. The isolated TSan runtime evidence
 uses the exact nightly and unchanged baseline specified in TSAN.md. These results do not qualify additional platforms or Versity checksum behavior.
+
+The phase-2 Versity conditional test deliberately remains failing; no SDK
+header was dropped to accommodate it. KMS/DSSE request construction is fixture
+coverage only. Current LLVM isolated strict gate has an unsuppressed intermittent
+OpenSSL warning; see RELEASE_READINESS.md. AWS harness: AWS_QUALIFICATION.md.

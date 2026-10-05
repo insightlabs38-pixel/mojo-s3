@@ -25,6 +25,16 @@ paths; it neither proves race freedom nor qualifies Mojo 1.1.0's packaged runtim
 Remaining review limits: no actual AWS identity/bucket, ARM64/macOS execution,
 long-running fuzz campaign, independent penetration assessment, formal scan, or
 all native dependency internals. Native dependencies require OS security updates.
-Hosted CI is authored but unexecuted. Secure zeroization, refreshing/network
-credential providers, cancellation and operation-wide deadlines remain future
-work. See [SECURITY.md](SECURITY.md) for application responsibilities.
+Hosted baseline CI passed; phase-2 evidence is in RELEASE_READINESS.md. Secure zeroization and operation-wide deadlines remain future work. Native
+refresh/cancellation additions are reviewed/tested experimental surfaces, not a
+formal audit. See [SECURITY.md](SECURITY.md) for application responsibilities.
+
+## Phase-2 bounded review
+
+Credential endpoint trust/timeouts/64KiB parser limits, expiration/fail-closed
+refresh/copy ownership, typed headers, batch outcome identity, copy embedded
+errors, ETag/version-pinned ranges, coordinator callbacks, joins-before-abort and
+fsync/atomic replacement received direct review and deterministic faults. No
+credential is logged. Local synthetic fixtures do not replace workload identity
+or KMS authorization testing on AWS. The unsuppressed intermittent OpenSSL TSan
+warning is retained, so native dependency race qualification is incomplete.
